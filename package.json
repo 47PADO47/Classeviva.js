@@ -1,0 +1,23 @@
+{
+  "name": "classeviva.js",
+  "version": "1.0.0",
+  "description": "A lightweight Node.js module for Classeviva / Spaggiari electronic register 📚",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "update:docs": "node src/UpdateDocs.js && git add docs && git commit -m \"📋 - Update docs\" && git push"
+  },
+  "keywords": [
+    "classeviva"
+  ],
+  "author": "PADO",
+  "homepage": "https://github.com/47PADO47/Classeviva.js#readme",
+  "repository": {
+    "type" : "git",
+    "url" : "https://github.com/47PADO47/Classeviva.js.git"
+  },
+  "dependencies": {
+    "node-fetch": "^2.6.6"
+  },
+  "license": "MIT"
+}
