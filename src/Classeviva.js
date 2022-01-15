@@ -31,15 +31,17 @@ class Classeviva {
 
     /**
      * Logins to Classeviva
+     * @param {string} [username] Classeviva credentials username
+     * @param {string} [password] Classeviva credentials password
      * @returns {object} user object
      */
-    async login() {
+    async login(username = this.username, password = this.password) {
         if (this.authorized) return this.#log("Already logged in ❌");
 
         if (!await this.#checkTemp()) {
             const userData = {
-                uid: this.username,
-                pass: this.password,
+                uid: username,
+                pass: password,
             };
     
             const response = await require('node-fetch')(`${this.baseUrl}/auth/login/`, {
@@ -95,7 +97,7 @@ class Classeviva {
 
     /**
      * Get student's cards
-     * @returns {Array<object>} Array of objects containing the student's cards
+     * @returns {object[]} Array of objects containing the student's cards
      */
     async getCards() {
         const data = await this.#fetch("/cards");
@@ -104,7 +106,7 @@ class Classeviva {
 
     /**
      * Get student's grades
-     * @returns {Array<object>} Array of objects containing the student's grades
+     * @returns {object[]} Array of objects containing the student's grades
      */
     async getGrades() {
         //${subject ? `/subject/${subject}` : `/`}
@@ -114,13 +116,20 @@ class Classeviva {
 
     /**
      * Get student's absences
-     * @returns {Array<object>} Array of objects containing the student's absences
+     * @returns {object[]} Array of objects containing the student's absences
      */
     async getAbsences() {
         const data = await this.#fetch(`/absences/details`);
         return data?.events ? data.events : [];
     };
 
+    /**
+     * Get student's agenda
+     * @param {string} filter "all" | "homework" | "other", default "all", used to filter the agenda
+     * @param {Date} start The start date of the agenda (defaults to today)
+     * @param {Date} end  The end date of the agenda (defaults to today)
+     * @returns {object[]} Array of objects containing the student's agenda
+     */
     async getAgenda(filter = "all", start = new Date(), end = new Date()) {
         const filters = ["all", "homework", "other"];
         if (!filters.includes(filter)) return this.#log("Invalid filter ❌");
@@ -136,7 +145,7 @@ class Classeviva {
 
     /**
      * Get student's documents
-     * @returns {Array<object>} Array of objects containing the student's documents
+     * @returns {object[]} Array of objects containing the student's documents
      */
     async getDocuments() {
         const data = await this.#fetch("/documents", "POST");
@@ -145,7 +154,7 @@ class Classeviva {
 
     /**
      * Get student's noticeboard items
-     * @returns {Array<object>} Array of objects containing the student's noticeboard items
+     * @returns {object[]} Array of objects containing the student's noticeboard items
      */
     async getNoticeboard() {
         const data = await this.#fetch("/noticeboard");
@@ -154,7 +163,7 @@ class Classeviva {
 
     /**
      * Get student's books
-     * @returns {Array<object>} Array of objects containing the student's books
+     * @returns {object[]} Array of objects containing the student's books
      */
     async getSchoolBooks() {
         const data = await this.#fetch("/schoolbooks");
@@ -163,7 +172,7 @@ class Classeviva {
 
     /**
      * Get student's calendar
-     * @returns {Array<object>} Array of objects containing the student's calendar
+     * @returns {object[]} Array of objects containing the student's calendar
      */
     async getCalendar() {
         const data = await this.#fetch("/calendar/all");
@@ -172,7 +181,10 @@ class Classeviva {
 
     /**
      * Get student's lessons
-     * @returns {Array<object>} Array of objects containing the student's lessons
+     * @param {boolean} [today] Boolean to get today's lessons, default true
+     * @param {Date} [start] If today is false, the start date of the lessons (defaults to today)
+     * @param {Date} [end] If today is false, the end date of the lessons (defaults to today)
+     * @returns {object[]} Array of objects containing the student's lessons
      */
     async getLessons(today = true, start = new Date(), end = new Date()) {
         const data = await this.#fetch(`/lessons${today ? "/today" : `/${this.#formatDate(start)}/${this.#formatDate(end)}`}`);
@@ -181,7 +193,7 @@ class Classeviva {
 
     /**
      * Get student's notes
-     * @returns {Array<object>} Array of objects containing the student's notes
+     * @returns {object[]} Array of objects containing the student's notes
      */
     async getNotes() {
         const data = await this.#fetch("/notes/all");
@@ -190,16 +202,16 @@ class Classeviva {
 
     /**
      * Get student's periods
-     * @returns {Array<object>} Array of objects containing the student's periods
+     * @returns {object[]} Array of objects containing the student's periods
      */
     async getPeriods() {
-        const data = await this.#fetch("/periodsz");
+        const data = await this.#fetch("/periods");
         return data?.periods ? data.periods : [];
     };
 
     /**
      * Get student's subjects
-     * @returns {Array<object>} Array of objects containing the student's subjects
+     * @returns {object[]} Array of objects containing the student's subjects
      */
     async getSubjects() {
         const data = await this.#fetch("/subjects");
@@ -208,11 +220,19 @@ class Classeviva {
 
     /**
      * Get student's didactics items
-     * @returns {Array<object>} Array of objects containing the student's didactics items
+     * @returns {object[]} Array of objects containing the student's didactics items
      */
     async getDidactics() {
         const data = await this.#fetch("/didactics");
         return data?.didacticts ? data.didacticts : [];
+    };
+
+    /**
+     * Get a list of the Classeviva clas' functions
+     * @returns {string[]} An array containing the Classeviva class' functions
+     */
+    getMethods() {
+        return Object.getOwnPropertyNames(Object.getPrototypeOf(this)).filter(prop => prop !== "constructor");
     };
 
     /**

@@ -8,7 +8,7 @@ const { readFileSync, writeFileSync } = require('fs');
     const DocsMethods = readme.split('## Methods').pop();
     
     const Methods = Object.getOwnPropertyNames(Classeviva.prototype).filter(method => method !== 'constructor').map(m => `> ${m}\n`);
-    const text = `\n\n- **Note:** All methods return a Promise.\n`
+    const text = `\n\n- **Note:** Almost all methods return a Promise.\n`
     
     const newDocs = readme.replace(DocsMethods, `${text}\n${Methods.join('\n')}`);
     await writeFileSync(`${dir}/README.md`, newDocs);

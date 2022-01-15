@@ -17,7 +17,7 @@ A lightweight Node.js module for Classeviva / Spaggiari electronic register 📚
 ```javascript
     const { Classeviva } = require('classeviva.js');
 
-    const classeviva = new Classeviva('USERNAME', 'PASSWORD');
+    const classeviva = new Classeviva('USERNAME / EMAIL', 'PASSWORD');
 
     (async () => {
         await classeviva.login();
@@ -36,7 +36,7 @@ A lightweight Node.js module for Classeviva / Spaggiari electronic register 📚
 
 ## Methods
 
-- **Note:** All methods return a Promise.
+- **Note:** Almost all methods return a Promise.
 
 > login
 
@@ -67,3 +67,5 @@ A lightweight Node.js module for Classeviva / Spaggiari electronic register 📚
 > getSubjects
 
 > getDidactics
+
+> getMethods
