@@ -64,15 +64,12 @@ class Classeviva {
             };
         };
 
-        if (this.authorized) {
-            this.#log(`Successfully logged in as "${this.user.name} ${this.user.surname}" ✅`);
-            this.login_timeout = setTimeout(() => {
-                this.login();
-            }, new Date(this.expiration) - +new Date() - (10 * 60 * 1000));
-        } else {
-            this.#log("Failed to login ❌");
-        };
-
+        if (!this.authorized) return this.#log("Failed to login ❌");
+         this.#log(`Successfully logged in as "${this.user.name} ${this.user.surname}" ✅`);
+         this.login_timeout = setTimeout(() => {
+             this.login();
+         }, new Date(this.expiration) - +new Date() - (10 * 60 * 1000));
+        
         return this.user;
     };
 
@@ -81,18 +78,17 @@ class Classeviva {
      * @returns {boolean} true if logged out, false if already logged out
      */
     logout() {
-        if (this.authorized) {
-            clearTimeout(this.login_timeout);
-            this.authorized = false;
-            this.#token = "";
-            this.user = {};
-            this.expiration = null;
-            this.#log("Successfully logged out ✅");
-            return true;
-        } else {
+        if (!this.authorized) {
             this.#log("Already logged out ❌");
             return false;
         };
+        clearTimeout(this.login_timeout);
+        this.authorized = false;
+        this.#token = "";
+        this.user = {};
+        this.expiration = null;
+        this.#log("Successfully logged out ✅");
+        return true;
     };
 
     /**
@@ -101,7 +97,7 @@ class Classeviva {
      */
     async getCards() {
         const data = await this.#fetch("/cards");
-        return data?.cards ? data.cards : [];
+        return data?.cards ?? [];
     };
 
     /**
@@ -111,7 +107,7 @@ class Classeviva {
     async getGrades() {
         //${subject ? `/subject/${subject}` : `/`}
         const data = await this.#fetch(`/grades`);
-        return data?.grades ? data.grades : [];
+        return data?.grades ?? [];
     };
 
     /**
@@ -120,7 +116,7 @@ class Classeviva {
      */
     async getAbsences() {
         const data = await this.#fetch(`/absences/details`);
-        return data?.events ? data.events : [];
+        return data?.events ?? [];
     };
 
     /**
@@ -140,7 +136,7 @@ class Classeviva {
         };
 
         const data = await this.#fetch(`/agenda/${map[filter]}/${this.#formatDate(start)}/${this.#formatDate(end)}`);
-        return data?.agenda ? data.agenda : [];
+        return data?.agenda ?? [];
     };
 
     /**
@@ -149,7 +145,7 @@ class Classeviva {
      */
     async getDocuments() {
         const data = await this.#fetch("/documents", "POST");
-        return data ? data : [];
+        return data ?? [];
     };
 
     /**
@@ -158,7 +154,7 @@ class Classeviva {
      */
     async getNoticeboard() {
         const data = await this.#fetch("/noticeboard");
-        return data?.items ? data.items : [];
+        return data?.items ?? [];
     };
 
     /**
@@ -167,7 +163,7 @@ class Classeviva {
      */
     async getSchoolBooks() {
         const data = await this.#fetch("/schoolbooks");
-        return data?.schoolbooks ? data.schoolbooks : [];
+        return data?.schoolbooks ?? [];
     };
 
     /**
@@ -176,7 +172,7 @@ class Classeviva {
      */
     async getCalendar() {
         const data = await this.#fetch("/calendar/all");
-        return data?.calendar ? data.calendar : [];
+        return data?.calendar ?? [];
     };
 
     /**
@@ -188,7 +184,7 @@ class Classeviva {
      */
     async getLessons(today = true, start = new Date(), end = new Date()) {
         const data = await this.#fetch(`/lessons${today ? "/today" : `/${this.#formatDate(start)}/${this.#formatDate(end)}`}`);
-        return data?.lessons ? data.lessons : [];
+        return data?.lessons ?? [];
     };
 
     /**
@@ -197,7 +193,7 @@ class Classeviva {
      */
     async getNotes() {
         const data = await this.#fetch("/notes/all");
-        return data ? data : [];
+        return data ?? [];
     };
 
     /**
@@ -206,7 +202,7 @@ class Classeviva {
      */
     async getPeriods() {
         const data = await this.#fetch("/periods");
-        return data?.periods ? data.periods : [];
+        return data?.periods ?? [];
     };
 
     /**
@@ -215,7 +211,7 @@ class Classeviva {
      */
     async getSubjects() {
         const data = await this.#fetch("/subjects");
-        return data?.subjects ? data.subjects : [];
+        return data?.subjects ?? [];
     };
 
     /**
@@ -224,15 +220,112 @@ class Classeviva {
      */
     async getDidactics() {
         const data = await this.#fetch("/didactics");
-        return data?.didacticts ? data.didacticts : [];
+        return data?.didacticts ?? [];
     };
 
     /**
-     * Get a list of the Classeviva clas' functions
+     * Get a list of the Classeviva class' functions
      * @returns {string[]} An array containing the Classeviva class' functions
      */
     getMethods() {
         return Object.getOwnPropertyNames(Object.getPrototypeOf(this)).filter(prop => prop !== "constructor");
+    };
+
+    /**
+     * Get a list of the possible parents options for classeviva
+     * @returns {object} An object containing all the possible parents options for classeviva
+     */
+    async getParentsOptions() {
+        const data = await this.#fetch("/_options", "GET", "parents");
+        return data?.options ?? {};
+    };
+
+    /**
+     *  Get a list of the avaible talks with teachers on classeviva
+     * @returns {object[]} An array of objects containing data about the avaible talks with teachers for classeviva
+     */
+    async getOverallTalks() {
+        const data = await this.#fetch("/overalltalks/list", "GET", "parents");
+        return data?.overallTalks ?? [];
+    };
+    
+    /**
+     *  Get a list of something regarding the talks with teachers
+     * @param {Date} start The start date of the talks (defaults to today)
+     * @param {Date} end The end date of the talks (defaults to today)
+     * @returns {object[]} An array of objects containing data about the talks with teachers for classeviva
+     */
+    async getTalks(start = new Date(), end = new Date()) {
+        const data = await this.#fetch(`/talks/teachersframes/${this.#formatDate(start)}/${this.#formatDate(end)}`, "GET", "parents");
+        return data?.teachers ?? [];
+    };
+
+    /**
+     *  Get auth ticket
+     * @returns {object} An object containing data about the auth ticket
+     */
+    async getTicket() {
+        if (!this.authorized) return this.#log("Not authorized ❌");
+
+        const headers = Object.assign({ "Z-Auth-Token": this.#token }, this.#headers);
+        const res = await require("node-fetch")(`${this.baseUrl}/auth/ticket`, {
+            headers
+        });
+
+        const data = await res.json()
+        .catch(e => this.#log("Could not parse JSON while getting ticket ❌"));
+
+        return data ?? {};
+    };
+
+    /**
+     *  Get the user avatar
+     * @returns {unknown} The user avatar (never tested)
+     */
+    async getAvatar() {
+        if (!this.authorized) return this.#log("Not authorized ❌");
+
+        const headers = Object.assign({ "Z-Auth-Token": this.#token }, this.#headers);
+        const res = await require("node-fetch")(`${this.baseUrl}/auth/avatar`, {
+            headers
+        });
+
+        const data = await res.json()
+        .catch(e => this.#log("Could not parse JSON while getting avatar ❌"));
+
+        return data ?? {};
+    };
+
+    /**
+     * Get an overview of the day specified or the time specified
+     * @param {Date} start The start date of the overview (defaults to today)
+     * @param {Date} end The end date of the overview (defaults to today)
+     * @returns {object} An object containing data about the overview of a day or the time specified
+     */
+    async getOverview(start = new Date(), end = new Date()) {
+        const data = await this.#fetch(`/overview/all/${this.#formatDate(start)}/${this.#formatDate(end)}`);
+        return data ?? {};
+    };
+
+    /*/**
+     * Still not implemented 😢
+     * @param {string || number} id 
+     * @param {string} message
+     * @returns {unknown}
+     */
+    /*async sendTeacherMessage(id, message) {
+        const data = await this.#fetch("/talks/teachermessage", "POST", "parents");
+        return data ?? {};
+    }; */
+
+    /**
+     * Checks if a document is avaible
+     * @param {string | number} hash The hash of the document
+     * @returns {object} An object containing data about the document
+     */
+    async checkDocument(hash) {
+        const data = await this.#fetch(`/documents/check/${hash}/`, "POST");
+        return data?.document ?? {};
     };
 
     /**
@@ -305,15 +398,16 @@ class Classeviva {
     /**
      * @private Fetch data from the server and the specified endpoint, then returns it
      * @param {string} path api path
-     * @param {string} method http method
-     * @param {string} responseType the response type
+     * @param {string} [method] http method
+     * @param {string} [type] students | parents
+     * @param {string} [responseType] the response type
      * @returns {Promise<object>} the response
      */
-    async #fetch(path = "/", method = "GET", responseType = "json") {
+    async #fetch(path = "/", method = "GET", type = "students", responseType = "json") {
         if (!this.authorized) return this.#log("Not logged in ❌");
         const headers = Object.assign({ "Z-Auth-Token": this.#token }, this.#headers);
 
-        var response = await require('node-fetch')(`${this.baseUrl}/students/${this.user.id}${path}`, {
+        var response = await require('node-fetch')(`${this.baseUrl}/${type}/${this.user.id}${path}`, {
             method: method.toUpperCase(),
             headers
         });
