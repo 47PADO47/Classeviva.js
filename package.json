@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "update:docs": "node src/UpdateDocs.js && git add docs && git commit -m \"📋 - Update docs\" && git push"
+    "update:docs": "node src/UpdateDocs.js && git commit -a -m \"📋 - Update docs\" && git push"
   },
   "keywords": [
     "classeviva"

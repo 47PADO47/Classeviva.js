@@ -69,3 +69,17 @@ A lightweight Node.js module for Classeviva / Spaggiari electronic register 📚
 > getDidactics
 
 > getMethods
+
+> getParentsOptions
+
+> getOverallTalks
+
+> getTalks
+
+> getTicket
+
+> getAvatar
+
+> getOverview
+
+> checkDocument
