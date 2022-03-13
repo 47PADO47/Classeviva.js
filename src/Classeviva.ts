@@ -77,7 +77,7 @@ class Classeviva {
 
             if (response.status !== 200) return this.#log(`The server returned a status code other than 200 (${response.status}) ❌`);
             
-            this.#updateData(json);    
+            this.#updateData(json);
             await writeFileSync(`${this.#directory}/cvv.json`, JSON.stringify(json, null, 2));
         };
 
@@ -418,7 +418,7 @@ class Classeviva {
                 surname: data.lastName,
                 id: this.#removeLetters(data.ident || ""),
             };
-            this.expiration = data.expire || `${new Date().getFullYear()}-${new Date().getMonth()}-${new Date().getDate()}T${new Date().getHours()}:${new Date().getMinutes()}:${new Date().getSeconds()}+01:00`; 
+            this.expiration = data.expire || `${new Date().getFullYear()}-${new Date().getMonth()}-${new Date().getDate()}T${new Date().getHours()}:${new Date().getMinutes()}:${new Date().getSeconds()}+01:00`;
             return;
         } else return;
 
