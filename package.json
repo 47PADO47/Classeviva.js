@@ -1,11 +1,13 @@
 {
   "name": "classeviva.js",
-  "version": "1.2.0",
+  "version": "2.0.1",
   "description": "A lightweight Node.js module for Classeviva / Spaggiari electronic register 📚",
-  "main": "index.js",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "update:docs": "node src/UpdateDocs.js && git commit -a -m \"📋 - Update docs\" && git push"
+    "build": "npx tsc",
+    "update:docs": "node dist/UpdateDocs.js && git commit -a -m \"📋 - Update docs\" && git push"
   },
   "keywords": [
     "classeviva"
@@ -17,8 +19,22 @@
     "url": "https://github.com/47PADO47/Classeviva.js.git"
   },
   "dependencies": {
-    "node-fetch": "^2.6.6"
+    "node-fetch": "^2.6.7"
   },
-  "types": "./typings/index.d.ts",
-  "license": "MIT"
+  "license": "MIT",
+  "devDependencies": {
+    "@types/node": "^17.0.21",
+    "@types/node-fetch": "^2.6.1",
+    "tslib": "^2.3.1",
+    "typescript": "^4.6.2"
+  },
+  "files": [
+    "dist/*.ts",
+    "dist/*.js",
+    "dist/*.d.ts",
+    "dist/*.map",
+    "dist/src/*.ts",
+    "dist/src/*.js",
+    "dist/src/*.d.ts"
+  ]
 }

@@ -1,0 +1,29 @@
+{
+    "compilerOptions": {
+        "strict": true,
+        "moduleResolution": "node",
+        "module": "commonjs",
+        "target": "ESNext",
+        "lib": [
+            "ESNext",
+            "ESNext.array",
+            "ESNext.AsyncIterable",
+            "ESNext.intl",
+            "ESNext.symbol"
+        ],
+        "declaration": true,
+        "declarationMap": true,
+        "sourceMap": true,
+        "removeComments": false,
+        "alwaysStrict": true,
+        "pretty": true,
+        "outDir": "dist",
+        "incremental": true,
+        "noEmitHelpers": true,
+        "importHelpers": true,
+        "skipLibCheck": true,
+        "esModuleInterop": true,
+        "strictPropertyInitialization": false,
+        "experimentalDecorators": true
+    }
+}

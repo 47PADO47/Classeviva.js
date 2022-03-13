@@ -1,18 +1,33 @@
-const { readFileSync, writeFileSync } = require('fs');
+import fetch, { BodyInit, HeadersInit, Response } from 'node-fetch';
+import * as path from 'path';
+import { readFileSync, writeFileSync } from 'fs';
+import { User, Headers, FetchType, FetchMethod, FetchResponse, LoginResponse, AgendaFilter, TalkOptions } from './struct';
 
 class Classeviva {
-    #token = "";
-    #headers = {};
-    constructor(username = "", password = "") {
-        this.username = username;
-        this.password = password;
+    public username: string;
+    readonly #password: string;
+    #token: string;
+
+    readonly #baseUrl: string;
+    readonly #directory: string;
+
+    public login_timeout: NodeJS.Timeout;
+    public expiration: string;
+    
+    public authorized: boolean;
+    public user: User;
+
+    #headers: Headers;
+    constructor(username?: string, password?: string) {
+        this.username = username || "";
+        this.#password = password || "";
         this.#token = "";
 
-        this.baseUrl = "https://web.spaggiari.eu/rest/v1";
-        this.directory = require('path').parse(__dirname).dir;
+        this.#baseUrl = "https://web.spaggiari.eu/rest/v1";
+        this.#directory = path.parse(__dirname).dir;
 
-        this.login_timeout = null;
-        this.expiration = null;
+        this.login_timeout;
+        this.expiration = "";
 
         this.authorized = false;
         this.user = {
@@ -35,8 +50,10 @@ class Classeviva {
      * @param {string} [password] Classeviva credentials password
      * @returns {object} user object
      */
-    async login(username = this.username, password = this.password) {
+    async login(username = this.username, password = this.#password): Promise<void | User> {
         if (this.authorized) return this.#log("Already logged in ❌");
+
+        if (!username || !password) return this.#log("Username or password not set ❌");
 
         if (!await this.#checkTemp()) {
             const userData = {
@@ -44,32 +61,32 @@ class Classeviva {
                 pass: password,
             };
     
-            const response = await require('node-fetch')(`${this.baseUrl}/auth/login/`, {
+            const response: Response = await fetch(`${this.#baseUrl}/auth/login/`, {
                 method: "POST",
                 headers: this.#headers,
                 body: JSON.stringify(userData),
             });
     
-            const json = await response.json();
+            const json: any = await response.json();
     
             if (json.error) {
                 this.#log(`An error happened: ${json.message} (${json.statusCode}) ❌`);
                 this.authorized = false;
                 return;
             };
-            if (response.status === 200) {
-                this.#updateData(json);
-    
-                writeFileSync(`${this.directory}/cvv.json`, JSON.stringify(json, null, 2));
-            };
+
+            if (response.status !== 200) return this.#log(`The server returned a status code other than 200 (${response.status}) ❌`);
+            
+            this.#updateData(json);    
+            await writeFileSync(`${this.#directory}/cvv.json`, JSON.stringify(json, null, 2));
         };
 
         if (!this.authorized) return this.#log("Failed to login ❌");
-         this.#log(`Successfully logged in as "${this.user.name} ${this.user.surname}" ✅`);
-         this.login_timeout = setTimeout(() => {
-             this.login();
-         }, new Date(this.expiration) - +new Date() - (10 * 60 * 1000));
-        
+
+        this.#log(`Successfully logged in as "${this.user.name} ${this.user.surname}" ✅`);
+        this.login_timeout = setTimeout(() => {
+            this.login();
+        }, 1000 * 60 * 60 * 1.5);
         return this.user;
     };
 
@@ -77,7 +94,7 @@ class Classeviva {
      * Logs out from Classeviva
      * @returns {boolean} true if logged out, false if already logged out
      */
-    logout() {
+    logout(): boolean {
         if (!this.authorized) {
             this.#log("Already logged out ❌");
             return false;
@@ -86,7 +103,7 @@ class Classeviva {
         this.authorized = false;
         this.#token = "";
         this.user = {};
-        this.expiration = null;
+        this.expiration = "";
         this.#log("Successfully logged out ✅");
         return true;
     };
@@ -95,16 +112,25 @@ class Classeviva {
      * Get student's cards
      * @returns {object[]} Array of objects containing the student's cards
      */
-    async getCards() {
+    async getCards(): Promise<any> {
         const data = await this.#fetch("/cards");
         return data?.cards ?? [];
+    };
+
+    /**
+     * Get student's card
+     * @returns {object} Objects containing the student's cards
+     */
+    async getCard(): Promise<any> {
+        const data = await this.#fetch("/card");
+        return data?.card ?? {};
     };
 
     /**
      * Get student's grades
      * @returns {object[]} Array of objects containing the student's grades
      */
-    async getGrades() {
+    async getGrades(): Promise<any> {
         //${subject ? `/subject/${subject}` : `/`}
         const data = await this.#fetch(`/grades`);
         return data?.grades ?? [];
@@ -114,7 +140,7 @@ class Classeviva {
      * Get student's absences
      * @returns {object[]} Array of objects containing the student's absences
      */
-    async getAbsences() {
+    async getAbsences(): Promise<any> {
         const data = await this.#fetch(`/absences/details`);
         return data?.events ?? [];
     };
@@ -126,7 +152,7 @@ class Classeviva {
      * @param {Date} end  The end date of the agenda (defaults to today)
      * @returns {object[]} Array of objects containing the student's agenda
      */
-    async getAgenda(filter = "all", start = new Date(), end = new Date()) {
+    async getAgenda(filter: AgendaFilter = "all", start: Date = new Date(), end: Date = new Date()): Promise<any> {
         const filters = ["all", "homework", "other"];
         if (!filters.includes(filter)) return this.#log("Invalid filter ❌");
         const map = {
@@ -143,7 +169,7 @@ class Classeviva {
      * Get student's documents
      * @returns {object[]} Array of objects containing the student's documents
      */
-    async getDocuments() {
+    async getDocuments(): Promise<any> {
         const data = await this.#fetch("/documents", "POST");
         return data ?? [];
     };
@@ -152,7 +178,7 @@ class Classeviva {
      * Get student's noticeboard items
      * @returns {object[]} Array of objects containing the student's noticeboard items
      */
-    async getNoticeboard() {
+    async getNoticeboard(): Promise<any> {
         const data = await this.#fetch("/noticeboard");
         return data?.items ?? [];
     };
@@ -161,7 +187,7 @@ class Classeviva {
      * Get student's books
      * @returns {object[]} Array of objects containing the student's books
      */
-    async getSchoolBooks() {
+    async getSchoolBooks(): Promise<any> {
         const data = await this.#fetch("/schoolbooks");
         return data?.schoolbooks ?? [];
     };
@@ -170,7 +196,7 @@ class Classeviva {
      * Get student's calendar
      * @returns {object[]} Array of objects containing the student's calendar
      */
-    async getCalendar() {
+    async getCalendar(): Promise<any> {
         const data = await this.#fetch("/calendar/all");
         return data?.calendar ?? [];
     };
@@ -182,7 +208,7 @@ class Classeviva {
      * @param {Date} [end] If today is false, the end date of the lessons (defaults to today)
      * @returns {object[]} Array of objects containing the student's lessons
      */
-    async getLessons(today = true, start = new Date(), end = new Date()) {
+    async getLessons(today: boolean = true, start: Date = new Date(), end: Date = new Date()): Promise<any> {
         const data = await this.#fetch(`/lessons${today ? "/today" : `/${this.#formatDate(start)}/${this.#formatDate(end)}`}`);
         return data?.lessons ?? [];
     };
@@ -191,7 +217,7 @@ class Classeviva {
      * Get student's notes
      * @returns {object[]} Array of objects containing the student's notes
      */
-    async getNotes() {
+    async getNotes(): Promise<any> {
         const data = await this.#fetch("/notes/all");
         return data ?? [];
     };
@@ -200,7 +226,7 @@ class Classeviva {
      * Get student's periods
      * @returns {object[]} Array of objects containing the student's periods
      */
-    async getPeriods() {
+    async getPeriods(): Promise<any> {
         const data = await this.#fetch("/periods");
         return data?.periods ?? [];
     };
@@ -209,7 +235,7 @@ class Classeviva {
      * Get student's subjects
      * @returns {object[]} Array of objects containing the student's subjects
      */
-    async getSubjects() {
+    async getSubjects(): Promise<any> {
         const data = await this.#fetch("/subjects");
         return data?.subjects ?? [];
     };
@@ -218,7 +244,7 @@ class Classeviva {
      * Get student's didactics items
      * @returns {object[]} Array of objects containing the student's didactics items
      */
-    async getDidactics() {
+    async getDidactics(): Promise<any> {
         const data = await this.#fetch("/didactics");
         return data?.didacticts ?? [];
     };
@@ -227,7 +253,7 @@ class Classeviva {
      * Get a list of the Classeviva class' functions
      * @returns {string[]} An array containing the Classeviva class' functions
      */
-    getMethods() {
+    getMethods(): string[] {
         return Object.getOwnPropertyNames(Object.getPrototypeOf(this)).filter(prop => prop !== "constructor");
     };
 
@@ -235,7 +261,7 @@ class Classeviva {
      * Get a list of the possible parents options for classeviva
      * @returns {object} An object containing all the possible parents options for classeviva
      */
-    async getParentsOptions() {
+    async getParentsOptions(): Promise<any> {
         const data = await this.#fetch("/_options", "GET", "parents");
         return data?.options ?? {};
     };
@@ -244,7 +270,7 @@ class Classeviva {
      *  Get a list of the avaible talks with teachers on classeviva
      * @returns {object[]} An array of objects containing data about the avaible talks with teachers for classeviva
      */
-    async getOverallTalks() {
+    async getOverallTalks(): Promise<any> {
         const data = await this.#fetch("/overalltalks/list", "GET", "parents");
         return data?.overallTalks ?? [];
     };
@@ -255,7 +281,7 @@ class Classeviva {
      * @param {Date} end The end date of the talks (defaults to today)
      * @returns {object[]} An array of objects containing data about the talks with teachers for classeviva
      */
-    async getTalks(start = new Date(), end = new Date()) {
+    async getTalks(start: Date = new Date(), end: Date = new Date()): Promise<any> {
         const data = await this.#fetch(`/talks/teachersframes/${this.#formatDate(start)}/${this.#formatDate(end)}`, "GET", "parents");
         return data?.teachers ?? [];
     };
@@ -264,34 +290,34 @@ class Classeviva {
      *  Get auth ticket
      * @returns {object} An object containing data about the auth ticket
      */
-    async getTicket() {
+    async getTicket(): Promise<any> {
         if (!this.authorized) return this.#log("Not authorized ❌");
 
         const headers = Object.assign({ "Z-Auth-Token": this.#token }, this.#headers);
-        const res = await require("node-fetch")(`${this.baseUrl}/auth/ticket`, {
+        const res: Response = await fetch(`${this.#baseUrl}/auth/ticket`, {
             headers
         });
 
-        const data = await res.json()
-        .catch(e => this.#log("Could not parse JSON while getting ticket ❌"));
+        const data: any = await res.json()
+        .catch(() => this.#log("Could not parse JSON while getting ticket ❌"));
 
         return data ?? {};
     };
 
     /**
      *  Get the user avatar
-     * @returns {unknown} The user avatar (never tested)
+     * @returns {unknown} The user avatar (not tested)
      */
-    async getAvatar() {
+    async getAvatar(): Promise<any> {
         if (!this.authorized) return this.#log("Not authorized ❌");
 
         const headers = Object.assign({ "Z-Auth-Token": this.#token }, this.#headers);
-        const res = await require("node-fetch")(`${this.baseUrl}/auth/avatar`, {
+        const res: Response = await fetch(`${this.#baseUrl}/auth/avatar`, {
             headers
         });
 
-        const data = await res.json()
-        .catch(e => this.#log("Could not parse JSON while getting avatar ❌"));
+        const data: any = await res.json()
+        .catch(() => this.#log("Could not parse JSON while getting avatar ❌"));
 
         return data ?? {};
     };
@@ -302,39 +328,63 @@ class Classeviva {
      * @param {Date} end The end date of the overview (defaults to today)
      * @returns {object} An object containing data about the overview of a day or the time specified
      */
-    async getOverview(start = new Date(), end = new Date()) {
+    async getOverview(start: Date = new Date(), end: Date = new Date()): Promise<any> {
         const data = await this.#fetch(`/overview/all/${this.#formatDate(start)}/${this.#formatDate(end)}`);
         return data ?? {};
     };
 
     /*/**
-     * Still not implemented 😢
-     * @param {string || number} id 
-     * @param {string} message
+     * Not implemented yet 😢
+     * @param {string || number} bookingId booking id of the talk
+     * @param {string} message message to send
      * @returns {unknown}
      */
-    /*async sendTeacherMessage(id, message) {
-        const data = await this.#fetch("/talks/teachermessage", "POST", "parents");
+    /*async sendTeacherMessage(bookingId: string, message: string) {
+        const data = await this.#fetch(`/talks/teachermessage/${bookingId}`, "POST", "parents");
         return data ?? {};
     }; */
+
+    /**
+     * Read messages from the inbox of a talk
+     * @param {string || number} bookingId booking id of the talk
+     * @param {string} message message to send
+     * @returns {object}
+     */
+    async readTalkMessage(bookingId: string) {
+        const data = await this.#fetch(`/talks/teachermessage/${bookingId}`, "POST", "parents", JSON.stringify({"messageRead":true}));
+        return data ?? {};
+    };
 
     /**
      * Checks if a document is avaible
      * @param {string | number} hash The hash of the document
      * @returns {object} An object containing data about the document
      */
-    async checkDocument(hash) {
+    async checkDocument(hash: string | number): Promise<any> {
         const data = await this.#fetch(`/documents/check/${hash}/`, "POST");
         return data?.document ?? {};
     };
 
     /**
+     * Book a talk with a teacher
+     * @param {string | number} teacherId The id of the teacher
+     * @param {string | number} talkId The id of the talk
+     * @param {string | number} slot The slot of the talk
+     * @param {object} opts contact options
+     * @returns {object} An object containing data about the booked talk
+     */
+    async bookTalk(teacherId: string | number, talkId: string | number, slot: string | number, opts: TalkOptions): Promise<any> {
+        const data = await this.#fetch(`/talks/book/${teacherId}/${talkId}/${slot}`, "POST", "parents", JSON.stringify(opts));
+        return data ?? {};
+    }
+
+    /**
      * @private Checks for temp file
      * @returns {boolean} True if there was temp file and it updated the data, false otherwise or in case of an error
      */
-    async #checkTemp() {
+    async #checkTemp(): Promise<boolean> {
         try {
-            const temp = await readFileSync(`${this.directory}/cvv.json`, "utf8");
+            const temp: string = await readFileSync(`${this.#directory}/cvv.json`, "utf8");
             if (!temp) {
                 return false;
             };
@@ -354,21 +404,21 @@ class Classeviva {
      * @param {object} data user data to update
      * @returns {void}
      */
-    #updateData(data) {
+    #updateData(data: LoginResponse): void {
         if (!data) {
             this.logout();
             return;
         };
 
         if (typeof data === "object") {
-            new Date(data.expire) > new Date() ? this.authorized = true : this.authorized = false;
-            this.#token = data.token;
+            new Date(data.expire || new Date()) > new Date() ? this.authorized = true : this.authorized = false;
+            this.#token = data.token || "";
             this.user = {
                 name: data.firstName,
                 surname: data.lastName,
-                id: this.#removeLetters(data.ident),
+                id: this.#removeLetters(data.ident || ""),
             };
-            this.expiration = data.expire;
+            this.expiration = data.expire || `${new Date().getFullYear()}-${new Date().getMonth()}-${new Date().getDate()}T${new Date().getHours()}:${new Date().getMinutes()}:${new Date().getSeconds()}+01:00`; 
             return;
         } else return;
 
@@ -379,7 +429,7 @@ class Classeviva {
      * @param {string} string string to remove letters from
      * @returns {string} string without letters
      */
-    #removeLetters(string) {
+    #removeLetters(string: string): string {
         return string.replace(/[^0-9]/g, "");
     };
 
@@ -388,7 +438,7 @@ class Classeviva {
      * @param {Date} date date to format
      * @returns {string} date in format YYYYMMDD
      */
-    #formatDate(date = new Date()) {
+    #formatDate(date = new Date()): string {
         const year = date.getFullYear();
         const month = date.getMonth() + 1;
         const day = date.getDate();
@@ -400,36 +450,43 @@ class Classeviva {
      * @param {string} path api path
      * @param {string} [method] http method
      * @param {string} [type] students | parents
-     * @param {string} [responseType] the response type
-     * @returns {Promise<object>} the response
+     * @param {boolean} [json] if the data should be parsed to json
+     * @returns {Promise<any>} the response
      */
-    async #fetch(path = "/", method = "GET", type = "students", responseType = "json") {
+    async #fetch(path: string = "/", method: FetchMethod = "GET", type: FetchType = "students", body: BodyInit = "", json: boolean = true): Promise<any> {
         if (!this.authorized) return this.#log("Not logged in ❌");
-        const headers = Object.assign({ "Z-Auth-Token": this.#token }, this.#headers);
 
-        var response = await require('node-fetch')(`${this.baseUrl}/${type}/${this.user.id}${path}`, {
+        const headers: HeadersInit = Object.assign({ "Z-Auth-Token": this.#token }, this.#headers);
+
+        const response: Response = await require('node-fetch')(`${this.#baseUrl}/${type}/${this.user.id}${path}`, {
             method: method.toUpperCase(),
-            headers
+            headers,
+            body: body
         });
 
-        if (responseType == "json") response = { data: await response.json(), status: response.status };
-        if (response?.data?.error) {
-            const { data } = response;
+        const res: FetchResponse = {
+            status: response.status,
+            data: json ? await response.json() : await response.buffer()
+        };
+
+        if (res.data?.error) {
+            const { data } = res;
             return this.#log(`An error happened: ${data.message ? data.message : data.error.split('/').pop()} (${data.statusCode}) ❌`);
         };
-        if (response.status === 200) {
-            return responseType == "json" ? response.data : response.body;
-        };
+
+        if (res.status !== 200) return this.#log(`The server returned a status different from 200 (${res.status}) ❌`);
+
+        return res.data;
     };
 
     /**
      * @private Logs whatever provided
-     * @param  {...any} args arguments to log
+     * @param  {any[]} args arguments to log
      * @returns {void} log in the console
      */
-    #log(...args) {
+    #log(...args: any[]): void {
         return console.log(`\x1b[31m[CLASSEVIVA]\x1b[0m`, ...args);
     };
 };
 
-module.exports = Classeviva;
+export default Classeviva;

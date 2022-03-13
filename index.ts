@@ -1,0 +1,1 @@
+export { default as Classeviva } from './src/Classeviva';

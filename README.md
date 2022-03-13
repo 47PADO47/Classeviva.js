@@ -4,7 +4,7 @@ A lightweight Node.js module for Classeviva / Spaggiari electronic register 📚
 ## Table Of Contents
   - [Installation](#installation)
   - [Example](#example)
-  - [Methods](#methods)
+  - [Docs](#docs)
 
 ## Installation
 
@@ -34,52 +34,6 @@ A lightweight Node.js module for Classeviva / Spaggiari electronic register 📚
     })();
 ```
 
-## Methods
+## Docs
 
-- **Note:** Almost all methods return a Promise.
-
-> login
-
-> logout
-
-> getCards
-
-> getGrades
-
-> getAbsences
-
-> getAgenda
-
-> getDocuments
-
-> getNoticeboard
-
-> getSchoolBooks
-
-> getCalendar
-
-> getLessons
-
-> getNotes
-
-> getPeriods
-
-> getSubjects
-
-> getDidactics
-
-> getMethods
-
-> getParentsOptions
-
-> getOverallTalks
-
-> getTalks
-
-> getTicket
-
-> getAvatar
-
-> getOverview
-
-> checkDocument
+Head over to [docs](/docs/) if you want some information about the `Classeviva` class.
