@@ -1,7 +1,7 @@
-import fetch, { BodyInit, HeadersInit, Response } from 'node-fetch';
+import fetch, { BodyInit, HeadersInit, RequestInit, Response } from 'node-fetch';
 import * as path from 'path';
 import { readFileSync, writeFileSync } from 'fs';
-import { User, Headers, FetchType, FetchMethod, FetchResponse, LoginResponse, AgendaFilter, TalkOptions } from './struct';
+import { User, Headers, FetchType, FetchMethod, FetchResponse, LoginResponse, AgendaFilter, TalkOptions, Overview } from './struct';
 
 class Classeviva {
     public username: string;
@@ -113,7 +113,7 @@ class Classeviva {
      * @returns {object[]} Array of objects containing the student's cards
      */
     async getCards(): Promise<any> {
-        const data = await this.#fetch("/cards");
+        const data: any = await this.#fetch("/cards");
         return data?.cards ?? [];
     };
 
@@ -122,7 +122,7 @@ class Classeviva {
      * @returns {object} Objects containing the student's cards
      */
     async getCard(): Promise<any> {
-        const data = await this.#fetch("/card");
+        const data: any = await this.#fetch("/card");
         return data?.card ?? {};
     };
 
@@ -132,7 +132,7 @@ class Classeviva {
      */
     async getGrades(): Promise<any> {
         //${subject ? `/subject/${subject}` : `/`}
-        const data = await this.#fetch(`/grades`);
+        const data: any = await this.#fetch(`/grades`);
         return data?.grades ?? [];
     };
 
@@ -141,7 +141,7 @@ class Classeviva {
      * @returns {object[]} Array of objects containing the student's absences
      */
     async getAbsences(): Promise<any> {
-        const data = await this.#fetch(`/absences/details`);
+        const data: any = await this.#fetch(`/absences/details`);
         return data?.events ?? [];
     };
 
@@ -161,7 +161,7 @@ class Classeviva {
             other: "AGNT",
         };
 
-        const data = await this.#fetch(`/agenda/${map[filter]}/${this.#formatDate(start)}/${this.#formatDate(end)}`);
+        const data: any = await this.#fetch(`/agenda/${map[filter]}/${this.#formatDate(start)}/${this.#formatDate(end)}`);
         return data?.agenda ?? [];
     };
 
@@ -170,7 +170,7 @@ class Classeviva {
      * @returns {object[]} Array of objects containing the student's documents
      */
     async getDocuments(): Promise<any> {
-        const data = await this.#fetch("/documents", "POST");
+        const data: any = await this.#fetch("/documents", "POST");
         return data ?? [];
     };
 
@@ -179,7 +179,7 @@ class Classeviva {
      * @returns {object[]} Array of objects containing the student's noticeboard items
      */
     async getNoticeboard(): Promise<any> {
-        const data = await this.#fetch("/noticeboard");
+        const data: any = await this.#fetch("/noticeboard");
         return data?.items ?? [];
     };
 
@@ -188,7 +188,7 @@ class Classeviva {
      * @returns {object[]} Array of objects containing the student's books
      */
     async getSchoolBooks(): Promise<any> {
-        const data = await this.#fetch("/schoolbooks");
+        const data: any = await this.#fetch("/schoolbooks");
         return data?.schoolbooks ?? [];
     };
 
@@ -197,7 +197,7 @@ class Classeviva {
      * @returns {object[]} Array of objects containing the student's calendar
      */
     async getCalendar(): Promise<any> {
-        const data = await this.#fetch("/calendar/all");
+        const data: any = await this.#fetch("/calendar/all");
         return data?.calendar ?? [];
     };
 
@@ -209,7 +209,7 @@ class Classeviva {
      * @returns {object[]} Array of objects containing the student's lessons
      */
     async getLessons(today: boolean = true, start: Date = new Date(), end: Date = new Date()): Promise<any> {
-        const data = await this.#fetch(`/lessons${today ? "/today" : `/${this.#formatDate(start)}/${this.#formatDate(end)}`}`);
+        const data: any = await this.#fetch(`/lessons${today ? "/today" : `/${this.#formatDate(start)}/${this.#formatDate(end)}`}`);
         return data?.lessons ?? [];
     };
 
@@ -218,7 +218,7 @@ class Classeviva {
      * @returns {object[]} Array of objects containing the student's notes
      */
     async getNotes(): Promise<any> {
-        const data = await this.#fetch("/notes/all");
+        const data: any = await this.#fetch("/notes/all");
         return data ?? [];
     };
 
@@ -227,7 +227,7 @@ class Classeviva {
      * @returns {object[]} Array of objects containing the student's periods
      */
     async getPeriods(): Promise<any> {
-        const data = await this.#fetch("/periods");
+        const data: any = await this.#fetch("/periods");
         return data?.periods ?? [];
     };
 
@@ -236,7 +236,7 @@ class Classeviva {
      * @returns {object[]} Array of objects containing the student's subjects
      */
     async getSubjects(): Promise<any> {
-        const data = await this.#fetch("/subjects");
+        const data: any = await this.#fetch("/subjects");
         return data?.subjects ?? [];
     };
 
@@ -245,7 +245,7 @@ class Classeviva {
      * @returns {object[]} Array of objects containing the student's didactics items
      */
     async getDidactics(): Promise<any> {
-        const data = await this.#fetch("/didactics");
+        const data: any = await this.#fetch("/didactics");
         return data?.didacticts ?? [];
     };
 
@@ -262,7 +262,7 @@ class Classeviva {
      * @returns {object} An object containing all the possible parents options for classeviva
      */
     async getParentsOptions(): Promise<any> {
-        const data = await this.#fetch("/_options", "GET", "parents");
+        const data: any = await this.#fetch("/_options", "GET", "parents");
         return data?.options ?? {};
     };
 
@@ -271,7 +271,7 @@ class Classeviva {
      * @returns {object[]} An array of objects containing data about the avaible talks with teachers for classeviva
      */
     async getOverallTalks(): Promise<any> {
-        const data = await this.#fetch("/overalltalks/list", "GET", "parents");
+        const data: any = await this.#fetch("/overalltalks/list", "GET", "parents");
         return data?.overallTalks ?? [];
     };
     
@@ -282,7 +282,7 @@ class Classeviva {
      * @returns {object[]} An array of objects containing data about the talks with teachers for classeviva
      */
     async getTalks(start: Date = new Date(), end: Date = new Date()): Promise<any> {
-        const data = await this.#fetch(`/talks/teachersframes/${this.#formatDate(start)}/${this.#formatDate(end)}`, "GET", "parents");
+        const data: any = await this.#fetch(`/talks/teachersframes/${this.#formatDate(start)}/${this.#formatDate(end)}`, "GET", "parents");
         return data?.teachers ?? [];
     };
 
@@ -328,8 +328,8 @@ class Classeviva {
      * @param {Date} end The end date of the overview (defaults to today)
      * @returns {object} An object containing data about the overview of a day or the time specified
      */
-    async getOverview(start: Date = new Date(), end: Date = new Date()): Promise<any> {
-        const data = await this.#fetch(`/overview/all/${this.#formatDate(start)}/${this.#formatDate(end)}`);
+    async getOverview(start: Date = new Date(), end: Date = new Date()): Promise<Overview | {}> {
+        const data: Overview | void = await this.#fetch(`/overview/all/${this.#formatDate(start)}/${this.#formatDate(end)}`);
         return data ?? {};
     };
 
@@ -340,7 +340,7 @@ class Classeviva {
      * @returns {unknown}
      */
     /*async sendTeacherMessage(bookingId: string, message: string) {
-        const data = await this.#fetch(`/talks/teachermessage/${bookingId}`, "POST", "parents");
+        const data: any = await this.#fetch(`/talks/teachermessage/${bookingId}`, "POST", "parents");
         return data ?? {};
     }; */
 
@@ -351,7 +351,7 @@ class Classeviva {
      * @returns {object}
      */
     async readTalkMessage(bookingId: string) {
-        const data = await this.#fetch(`/talks/teachermessage/${bookingId}`, "POST", "parents", JSON.stringify({"messageRead":true}));
+        const data: any = await this.#fetch(`/talks/teachermessage/${bookingId}`, "POST", "parents", JSON.stringify({"messageRead":true}));
         return data ?? {};
     };
 
@@ -361,7 +361,7 @@ class Classeviva {
      * @returns {object} An object containing data about the document
      */
     async checkDocument(hash: string | number): Promise<any> {
-        const data = await this.#fetch(`/documents/check/${hash}/`, "POST");
+        const data: any = await this.#fetch(`/documents/check/${hash}/`, "POST");
         return data?.document ?? {};
     };
 
@@ -374,7 +374,7 @@ class Classeviva {
      * @returns {object} An object containing data about the booked talk
      */
     async bookTalk(teacherId: string | number, talkId: string | number, slot: string | number, opts: TalkOptions): Promise<any> {
-        const data = await this.#fetch(`/talks/book/${teacherId}/${talkId}/${slot}`, "POST", "parents", JSON.stringify(opts));
+        const data: any = await this.#fetch(`/talks/book/${teacherId}/${talkId}/${slot}`, "POST", "parents", JSON.stringify(opts));
         return data ?? {};
     }
 
@@ -453,16 +453,17 @@ class Classeviva {
      * @param {boolean} [json] if the data should be parsed to json
      * @returns {Promise<any>} the response
      */
-    async #fetch(path: string = "/", method: FetchMethod = "GET", type: FetchType = "students", body: BodyInit = "", json: boolean = true): Promise<any> {
+    async #fetch<TResponse>(path: string = "/", method: FetchMethod = "GET", type: FetchType = "students", body: BodyInit = "", json: boolean = true): Promise<TResponse | void> {
         if (!this.authorized) return this.#log("Not logged in ❌");
 
         const headers: HeadersInit = Object.assign({ "Z-Auth-Token": this.#token }, this.#headers);
-
-        const response: Response = await require('node-fetch')(`${this.#baseUrl}/${type}/${this.user.id}${path}`, {
+        const options: RequestInit = {
             method: method.toUpperCase(),
             headers,
-            body: body
-        });
+        };
+        if (body) options.body = body;
+
+        const response: Response = await require('node-fetch')(`${this.#baseUrl}/${type}/${this.user.id}${path}`, options);
 
         const res: FetchResponse = {
             status: response.status,
