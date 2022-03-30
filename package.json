@@ -1,6 +1,6 @@
 {
   "name": "classeviva.js",
-  "version": "2.0.2",
+  "version": "2.1.0",
   "description": "A lightweight Node.js module for Classeviva / Spaggiari electronic register 📚",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -16,7 +16,7 @@
   "homepage": "https://github.com/47PADO47/Classeviva.js#readme",
   "repository": {
     "type": "git",
-    "url": "https://github.com/47PADO47/Classeviva.js.git"
+    "url": "git://github.com/47PADO47/Classeviva.js.git"
   },
   "dependencies": {
     "node-fetch": "^2.6.7"

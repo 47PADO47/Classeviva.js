@@ -2,12 +2,14 @@ import fetch, { BodyInit, HeadersInit, RequestInit, Response } from 'node-fetch'
 import * as path from 'path';
 import { readFileSync, writeFileSync } from 'fs';
 import { User, Headers, FetchType, FetchMethod, FetchResponse, LoginResponse, AgendaFilter, TalkOptions, Overview } from './struct';
+import * as Enums from './Enums';
 
 class Classeviva {
     public username: string;
     readonly #password: string;
     #token: string;
 
+    readonly #state: string;
     readonly #baseUrl: string;
     readonly #directory: string;
 
@@ -17,13 +19,15 @@ class Classeviva {
     public authorized: boolean;
     public user: User;
 
+    readonly #app : string;
     #headers: Headers;
-    constructor(username?: string, password?: string) {
+    constructor(username?: string, password?: string, state: string = Enums.States.Italy, app: string = Enums.Apps.Students) {
         this.username = username || "";
         this.#password = password || "";
         this.#token = "";
 
-        this.#baseUrl = "https://web.spaggiari.eu/rest/v1";
+        this.#state = state;
+        this.#baseUrl = `https://${Enums.Urls[this.#state]}/rest/v1`;
         this.#directory = path.parse(__dirname).dir;
 
         this.login_timeout;
@@ -36,11 +40,13 @@ class Classeviva {
             id: "",
         };
 
+        this.#app = app;
         this.#headers = {
             "Content-Type": "application/json",
             "Accept": "application/json",
-            "User-Agent": "zorro/1.0",
-            "Z-Dev-ApiKey": "+zorro+",
+            "User-Agent": `${this.#app} iOS/15.4`,
+            "Z-Dev-Apikey": "Tg1NWEwNGIgIC0K",
+            "Z-If-None-Match": "",
         };
     };
 
