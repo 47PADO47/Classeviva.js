@@ -34,8 +34,18 @@ export const Urls: Readonly<IUrls> = Object.freeze({
     AR: "ar.spaggiari.eu",
 });
 
+export interface IUsers {
+    [key: string]: string;
+}
+
+export const UserTypes: Readonly<IUsers> = {
+    S: "studente",
+    G: "genitore",
+};
+
 export default {
     States,
     Apps,
     Urls,
+    UserTypes,
 };

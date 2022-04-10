@@ -37,4 +37,4 @@ A lightweight Node.js module for Classeviva / Spaggiari electronic register 📚
 
 ## Docs
 
-Head over to [docs](/docs/) if you want some information about the `Classeviva` class.
+Head over to [docs](/docs/Readme.md) if you want some information about the `Classeviva` class.

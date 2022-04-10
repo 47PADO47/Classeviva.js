@@ -1,7 +1,7 @@
 import fetch, { BodyInit, HeadersInit, RequestInit, Response } from 'node-fetch';
 import * as path from 'path';
 import { readFileSync, writeFileSync } from 'fs';
-import { User, Headers, FetchType, FetchMethod, FetchResponse, LoginResponse, AgendaFilter, TalkOptions, Overview } from './struct';
+import { User, Headers, FetchType, FetchMethod, FetchResponse, LoginResponse, AgendaFilter, TalkOptions, Overview, Card, ContentElement, FetchId, TermsAgreementResponse, setTermsAgreementResponse } from './struct';
 import * as Enums from './Enums';
 
 class Classeviva {
@@ -35,9 +35,12 @@ class Classeviva {
 
         this.authorized = false;
         this.user = {
-            name: "",
-            surname: "",
-            id: "",
+            name: undefined,
+            surname: undefined,
+            id: undefined,
+            ident: undefined,
+            type: undefined,
+            school: {}
         };
 
         this.#app = app;
@@ -118,17 +121,21 @@ class Classeviva {
      * Get student's cards
      * @returns {object[]} Array of objects containing the student's cards
      */
-    async getCards(): Promise<any> {
-        const data: any = await this.#fetch("/cards");
+    async getCards(): Promise<Card[] | []> {
+        const data: { cards?: Card[] } | void = await this.#fetch("/cards");
+        if (data?.cards && data?.cards?.length > 0) this.#updateUser(data.cards[0]);
+        
         return data?.cards ?? [];
     };
 
     /**
      * Get student's card
-     * @returns {object} Objects containing the student's cards
+     * @returns {object} Object containing the student's card
      */
-    async getCard(): Promise<any> {
-        const data: any = await this.#fetch("/card");
+    async getCard(): Promise<Card | {}> {
+        const data: { card?: Card } | void = await this.#fetch("/card");
+        if (data?.card && Object.keys(data?.card).length > 0) this.#updateUser(data.card);
+
         return data?.card ?? {};
     };
 
@@ -382,7 +389,64 @@ class Classeviva {
     async bookTalk(teacherId: string | number, talkId: string | number, slot: string | number, opts: TalkOptions): Promise<any> {
         const data: any = await this.#fetch(`/talks/book/${teacherId}/${talkId}/${slot}`, "POST", "parents", JSON.stringify(opts));
         return data ?? {};
-    }
+    };
+
+    /**
+     * Get the list of contents that's displayed in the app (should be "Classeviva extra")
+     * @param {boolean} common idk, defaults to true
+     * @returns {object[]} An array of objects containing data about the contents that's displayed in the app
+     */
+    async getContents(common = true): Promise<ContentElement[] | [] | void> {
+        if (!this.authorized) return this.#log("Not authorized ❌");
+        if (!this.user.school?.code) return this.#log("No school code, please update using getCard() or getCards() ❌");
+
+        const headers = Object.assign({ "Z-Auth-Token": this.#token }, this.#headers);
+        const response: Response = await fetch(`https://${Enums.Urls[this.#state]}/gek/api/v1/${this.user.school.code}/2021/students/contents?common=${common}`, {
+            headers
+        });
+
+        const data: ContentElement[] = await response.json()
+        .catch(() => this.#log("Could not parse JSON while getting content ❌"));
+
+        return data ?? [];
+    };
+
+    /**
+     * Get infos about your agreement to the terms of classeviva. If you haven't agreed yet, this response body will be empty and the function will return an empty object.
+     * @returns {object} An object containing data about the agreement to the terms of classeviva
+     */
+    async getTermsAgreement(): Promise<TermsAgreementResponse | {}> {
+        const data: TermsAgreementResponse | void = await this.#fetch("/getTermsAgreement", "GET", "users", undefined, true, "userIdent");
+        return data ?? {};
+    };
+
+    /**
+     * Set the agreement to the terms of classeviva third party data colletors
+     * @param {boolean} ThirdParty Whether you agree to the terms of classeviva third party data colletors, defaults to true
+     * @returns {object} An object with the property "msg": "ok" if the agreement was set successfully
+     */
+    async setTermsAgreement(ThirdParty: boolean = false): Promise<setTermsAgreementResponse | {}> {
+        const accepted = ThirdParty ? "1" : "0";
+        const data: setTermsAgreementResponse | void = await this.#fetch("/setTermsAgreement", "POST", "users", JSON.stringify({bitmask: accepted}), true, "userIdent");
+        return data ?? {};
+    };
+
+    /**
+     * @private Updates the user object with school infos and the user type
+     * @param {object} card The user card (from getCard() or getCards())
+     * @return {void} Nothing
+     */
+    #updateUser(card: Card): void {
+        const { schName, schDedication, schCity, schProv, schCode, usrType } = card;
+        this.user.type = Enums.UserTypes[usrType || "S"];
+        this.user.school = {
+            name: schName,
+            dedication: schDedication,
+            city: schCity,
+            province: schProv,
+            code: schCode
+        };
+    };
 
     /**
      * @private Checks for temp file
@@ -423,6 +487,7 @@ class Classeviva {
                 name: data.firstName,
                 surname: data.lastName,
                 id: this.#removeLetters(data.ident || ""),
+                ident: data.ident,
             };
             this.expiration = data.expire || `${new Date().getFullYear()}-${new Date().getMonth()}-${new Date().getDate()}T${new Date().getHours()}:${new Date().getMinutes()}:${new Date().getSeconds()}+01:00`;
             return;
@@ -459,7 +524,7 @@ class Classeviva {
      * @param {boolean} [json] if the data should be parsed to json
      * @returns {Promise<any>} the response
      */
-    async #fetch<TResponse>(path: string = "/", method: FetchMethod = "GET", type: FetchType = "students", body: BodyInit = "", json: boolean = true): Promise<TResponse | void> {
+    async #fetch<TResponse>(path: string = "/", method: FetchMethod = "GET", type: FetchType = "students", body: BodyInit = "", json: boolean = true, id: FetchId = "userId"): Promise<TResponse | void> {
         if (!this.authorized) return this.#log("Not logged in ❌");
 
         const headers: HeadersInit = Object.assign({ "Z-Auth-Token": this.#token }, this.#headers);
@@ -467,9 +532,9 @@ class Classeviva {
             method: method.toUpperCase(),
             headers,
         };
-        if (body) options.body = body;
+        if (body && method !== "GET") options.body = body;
 
-        const response: Response = await require('node-fetch')(`${this.#baseUrl}/${type}/${this.user.id}${path}`, options);
+        const response: Response = await require('node-fetch')(`${this.#baseUrl}/${type}/${id == "userId" ? this.user.id : this.user.ident}${path}`, options);
 
         const res: FetchResponse = {
             status: response.status,

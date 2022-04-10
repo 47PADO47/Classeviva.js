@@ -2,14 +2,27 @@ interface User {
     name?: string;
     surname?: string;
     id?: number | string;
+    ident?: string;
+    type?: string;
+    school?: UserSchool;
+};
+
+type UserSchool = {
+    name?: string;
+    dedication?: string;
+    city?: string;
+    province?: string;
+    code?: string | number;
 };
 
 type Headers = {
     [key: string]: string;
 };
 
-type FetchType = "students" | "parents";
+type FetchType = "students" | "parents" | "users";
 type FetchMethod = "GET" | "POST";
+type FetchId = "userId" | "userIdent";
+
 interface FetchResponse {
     status?: number;
     data?: Json | Buffer;
@@ -31,9 +44,9 @@ interface TalkOptions {
     [key: string]: string | number | undefined,
 };
 
-type Json = Error | Overview | any;
+type Json = ResponseError | Overview | any;
 
-interface Error {
+interface ResponseError {
     statusCode?: number,
     message?: string,
     error?: string,
@@ -133,14 +146,67 @@ type NTWN = {
     warningType?: string,
 };
 
+type Card = {
+    ident?: string,
+    usrType?: string,
+    usrId?: number | string,
+    miurSchoolCode?: string,
+    miurDivisionCode?: string,
+    firstName?: string,
+    lastName?: string,
+    birthDate?: string,
+    fiscalCode?: string,
+    schCode?: string,
+    schName?: string,
+    schDedication?: string,
+    schCity?: string,
+    schProv?: string,
+};
+
+type ContentElement = {
+    id_contenuto?: number,
+    posizione?: string,
+    ordine?: number,
+    tags?: unknown,
+    inizio?: string,
+    fine?: string,
+    scadenza?: unknown,
+    pubblicato?: number,
+    visibile_prima_inizio?: number,
+    tipo?: string,
+    nome?: string,
+    link?: string,
+    opens_externally?: boolean,
+    contenuto_html?: string,
+    immagine_generata?: string,
+    accessibility_label?: string,
+    banner?: string,
+    banner_pos?: string,
+};
+
+interface TermsAgreementResponse {
+    schoolpass?: number,
+    bitmask?: number,
+    data_accettazione?: string,
+};
+
+interface setTermsAgreementResponse {
+    msg?: string,
+}
+
 export {
     User,
     Headers,
     FetchType,
     FetchMethod,
+    FetchId,
     FetchResponse,
     LoginResponse,
     AgendaFilter,
     TalkOptions,
-    Overview
+    Overview,
+    Card,
+    ContentElement,
+    TermsAgreementResponse,
+    setTermsAgreementResponse
 };
