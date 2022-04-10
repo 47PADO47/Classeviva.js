@@ -16,6 +16,7 @@ import { readdirSync, readFileSync, writeFileSync } from 'fs';
     } as { [key: string]: string[] };
 
     for (const file in filesObj) {
+        if (!Object.prototype.hasOwnProperty.call(filesObj, file)) return;
         console.log(`[🔁] Loading ${file}...`);
         
         const location: string = filesObj[file];

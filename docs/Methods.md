@@ -51,3 +51,9 @@
 > checkDocument
 
 > bookTalk
+
+> getContents
+
+> getTermsAgreement
+
+> setTermsAgreement
