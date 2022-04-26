@@ -1,6 +1,6 @@
 {
   "name": "classeviva.js",
-  "version": "2.2.0",
+  "version": "2.3.0",
   "description": "A lightweight Node.js module for Classeviva / Spaggiari electronic register 📚",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",

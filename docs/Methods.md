@@ -57,3 +57,11 @@
 > getTermsAgreement
 
 > setTermsAgreement
+
+> readNotice
+
+> getNoticeDocumentUrl
+
+> getTokenStatus
+
+> readDocument
