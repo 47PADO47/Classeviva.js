@@ -1,7 +1,7 @@
 import fetch, { BodyInit, HeadersInit, RequestInit, Response } from 'node-fetch';
 import * as path from 'path';
 import { readFileSync, writeFileSync } from 'fs';
-import { User, Headers, FetchType, FetchMethod, FetchResponse, LoginResponse, AgendaFilter, TalkOptions, Overview, Card, ContentElement, FetchId, TermsAgreementResponse, setTermsAgreementResponse, readOptions, TokenStatus, TicketResponse, checkDocument, absences, readNotice, Grade, calendarDay } from './struct';
+import { User, Headers, FetchType, FetchMethod, FetchResponse, LoginResponse, AgendaFilter, TalkOptions, Overview, Card, ContentElement, FetchId, TermsAgreementResponse, setTermsAgreementResponse } from './struct';
 import * as Enums from './Enums';
 
 class Classeviva {
@@ -143,8 +143,9 @@ class Classeviva {
      * Get student's grades
      * @returns {object[]} Array of objects containing the student's grades
      */
-    async getGrades(): Promise<Grade[] | []> {
-        const data: {grades: Grade[]} | void = await this.#fetch(`/grades2`);
+    async getGrades(): Promise<any> {
+        //${subject ? `/subject/${subject}` : `/`}
+        const data: any = await this.#fetch(`/grades`);
         return data?.grades ?? [];
     };
 
@@ -152,8 +153,8 @@ class Classeviva {
      * Get student's absences
      * @returns {object[]} Array of objects containing the student's absences
      */
-    async getAbsences(): Promise<absences[] | []> {
-        const data: {events: absences[]} | void = await this.#fetch(`/absences/details`);
+    async getAbsences(): Promise<any> {
+        const data: any = await this.#fetch(`/absences/details`);
         return data?.events ?? [];
     };
 
@@ -208,8 +209,8 @@ class Classeviva {
      * Get student's calendar
      * @returns {object[]} Array of objects containing the student's calendar
      */
-    async getCalendar(): Promise<calendarDay[] | []> {
-        const data: {calendar: calendarDay[]} | void = await this.#fetch("/calendar/all");
+    async getCalendar(): Promise<any> {
+        const data: any = await this.#fetch("/calendar/all");
         return data?.calendar ?? [];
     };
 
@@ -302,7 +303,7 @@ class Classeviva {
      *  Get auth ticket
      * @returns {object} An object containing data about the auth ticket
      */
-    async getTicket(): Promise<TicketResponse | void> {
+    async getTicket(): Promise<any> {
         if (!this.authorized) return this.#log("Not authorized ❌");
 
         const headers = Object.assign({ "Z-Auth-Token": this.#token }, this.#headers);
@@ -310,7 +311,7 @@ class Classeviva {
             headers
         });
 
-        const data: TicketResponse = await res.json()
+        const data: any = await res.json()
         .catch(() => this.#log("Could not parse JSON while getting ticket ❌"));
 
         return data ?? {};
@@ -372,8 +373,8 @@ class Classeviva {
      * @param {string | number} hash The hash of the document
      * @returns {object} An object containing data about the document
      */
-    async checkDocument(hash: string | number): Promise<checkDocument | {}> {
-        const data: checkDocument | void = await this.#fetch(`/documents/check/${hash}/`, "POST");
+    async checkDocument(hash: string | number): Promise<any> {
+        const data: any = await this.#fetch(`/documents/check/${hash}/`, "POST");
         return data?.document ?? {};
     };
 
@@ -428,66 +429,6 @@ class Classeviva {
         const accepted = ThirdParty ? "1" : "0";
         const data: setTermsAgreementResponse | void = await this.#fetch("/setTermsAgreement", "POST", "users", JSON.stringify({bitmask: accepted}), true, "userIdent");
         return data ?? {};
-    };
-
-    /**
-     * Read a notice from the school
-     * @param {string} eventCode Event code of the notice
-     * @param {string | number} id Id of the notice
-     * @param {object} options { sign, join, text }
-     * @returns {object} An object containing data about the notice
-     */
-    async readNotice(eventCode: string, id: string | number, options: readOptions = {}): Promise<readNotice | {}> {
-        const data: readNotice | void = await this.#fetch(`/noticeboard/read/${eventCode}/${id}/101`, "POST", "students", options ? JSON.stringify(options) : "", true, "userId", {
-            "Content-Type": "application/x-www-form-urlencoded"
-        });
-        return data ?? {};
-    };
-
-    /**
-     * Get the document url of a notice attachment
-     * @param {string} eventCode Event code of the notice
-     * @param {string | number} id Id of the notice
-     * @returns {string} The url of the document
-     */
-    async getNoticeDocumentUrl(eventCode: string, id: string | number): Promise<string | void> {
-        if (!this.authorized) return this.#log("Not authorized ❌");
-
-        const headers = Object.assign({ "Z-Auth-Token": this.#token }, this.#headers);
-        const response: Response = await fetch(`${this.#baseUrl}/students/${this.user.ident}/noticeboard/attach/${eventCode}/${id}/`, {
-            headers
-        });
-
-        const url = response.headers.get("Location");
-        return url ?? "";
-    };
-
-    /**
-     * Get the status of a token
-     * @param {string} token token to check, defaults to the token of the user
-     * @returns {object} An object containing data about the token
-     */
-    async getTokenStatus(token = this.#token): Promise<TokenStatus | {} | void> {
-        if (!this.authorized || !token) return this.#log("Not authorized ❌");
-
-        const headers = Object.assign({ "Z-Auth-Token": token }, this.#headers);
-        const response: Response = await fetch(`${this.#baseUrl}/auth/status/`, {
-            headers
-        });
-        const data: TokenStatus = await response.json()
-        .catch(() => this.#log("Could not parse JSON while getting token status ❌"));
-
-        return data ?? {};
-    };
-
-    /**
-     * Read a document
-     * @param {string} hash the hash of the document
-     * @returns {Buffer} The document
-     */
-    async readDocument(hash: string): Promise<Buffer> {
-        const data: Buffer | void = await this.#fetch(`/documents/read/${hash}/`, "POST", "students", undefined, false);
-        return data ?? Buffer.from("");
     };
 
     /**
@@ -580,16 +521,13 @@ class Classeviva {
      * @param {string} path api path
      * @param {string} [method] http method
      * @param {string} [type] students | parents
-     * @param {string} [body] body to send
      * @param {boolean} [json] if the data should be parsed to json
-     * @param {string} [id] user identifier
-     * @param {object} [head] additional headers to send
      * @returns {Promise<any>} the response
      */
-    async #fetch<TResponse>(path: string = "/", method: FetchMethod = "GET", type: FetchType = "students", body: BodyInit = "", json: boolean = true, id: FetchId = "userId", head: HeadersInit = {}): Promise<TResponse | void> {
+    async #fetch<TResponse>(path: string = "/", method: FetchMethod = "GET", type: FetchType = "students", body: BodyInit = "", json: boolean = true, id: FetchId = "userId"): Promise<TResponse | void> {
         if (!this.authorized) return this.#log("Not logged in ❌");
 
-        const headers: HeadersInit = Object.assign(this.#headers, { "Z-Auth-Token": this.#token, ...head });
+        const headers: HeadersInit = Object.assign({ "Z-Auth-Token": this.#token }, this.#headers);
         const options: RequestInit = {
             method: method.toUpperCase(),
             headers,
