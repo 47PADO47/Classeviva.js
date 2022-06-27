@@ -5,7 +5,7 @@ interface User {
     ident?: string;
     type?: string;
     school?: UserSchool;
-};
+}
 
 type UserSchool = {
     name?: string;
@@ -35,14 +35,14 @@ interface LoginResponse {
     showPwdChangeReminder: boolean,
     release: string,
     expire: string,
-};
+}
 
 type AgendaFilter = "all" | "homework" | "other";
 
 interface TalkOptions {
     cell?: string,
     [key: string]: string | number | undefined,
-};
+}
 
 type Json = ResponseError | Overview | any;
 
@@ -50,7 +50,7 @@ interface ResponseError {
     statusCode: number,
     message: string,
     error: string,
-};
+}
 
 interface Overview {
     virtualClassesAgenda: unknown[],
@@ -58,7 +58,7 @@ interface Overview {
     agenda: AgendaEvent[],
     grades: Grade[],
     note: AgendaNotes
-};
+}
 
 type Lesson = {
     evtId: number,
@@ -188,7 +188,7 @@ interface TermsAgreementResponse {
     schoolpass: number,
     bitmask: number,
     data_accettazione: string,
-};
+}
 
 interface setTermsAgreementResponse {
     msg: string,
@@ -198,7 +198,7 @@ interface readOptions {
     sign?: boolean,
     join?: boolean,
     text?: string,
-};
+}
 
 interface TokenStatus {
     status: {
@@ -207,20 +207,20 @@ interface TokenStatus {
         ident: string,
         remains: number,
     }
-};
+}
 
 interface TicketResponse {
     ticket: string,
     len: number,
     ulen: number,
     md5: string,
-};
+}
 
 interface checkDocument {
     document: {
         avaible: boolean,
     }
-};
+}
 
 interface absences {
     evtId: number,
@@ -231,7 +231,7 @@ interface absences {
     isJustified: boolean,
     justifReasonCode: string,
     justifReasonDesc: string,
-};
+}
 
 interface readNotice {
     item: {
@@ -244,13 +244,13 @@ interface readNotice {
         replJoin: boolean | null,
         replSign: boolean | null,
     }
-};
+}
 
 interface calendarDay {
     dayDate: string,
     dayOfWeek: number,
     status: "HD" | "NW" | "SD"
-};
+}
 
 export {
     User,
