@@ -51,7 +51,7 @@ class Classeviva {
             "Z-Dev-Apikey": "Tg1NWEwNGIgIC0K",
             "Z-If-None-Match": "",
         };
-    };
+    }
 
     /**
      * Logins to Classeviva
@@ -82,13 +82,13 @@ class Classeviva {
                 this.#log(`An error happened: ${json.message} (${json.statusCode}) ❌`);
                 this.authorized = false;
                 return;
-            };
+            }
 
             if (response.status !== 200) return this.#log(`The server returned a status code other than 200 (${response.status}) ❌`);
             
             this.#updateData(json);
             await writeFileSync(`${this.#directory}/cvv.json`, JSON.stringify(json, null, 2));
-        };
+        }
 
         if (!this.authorized) return this.#log("Failed to login ❌");
 
@@ -97,7 +97,7 @@ class Classeviva {
             this.login();
         }, 1000 * 60 * 60 * 1.5);
         return this.user;
-    };
+    }
 
     /**
      * Logs out from Classeviva
@@ -107,7 +107,7 @@ class Classeviva {
         if (!this.authorized) {
             this.#log("Already logged out ❌");
             return false;
-        };
+        }
         clearTimeout(this.login_timeout);
         this.authorized = false;
         this.#token = "";
@@ -115,7 +115,7 @@ class Classeviva {
         this.expiration = "";
         this.#log("Successfully logged out ✅");
         return true;
-    };
+    }
 
     /**
      * Get student's cards
@@ -126,7 +126,7 @@ class Classeviva {
         if (data?.cards && data?.cards?.length > 0) this.#updateUser(data.cards[0]);
         
         return data?.cards ?? [];
-    };
+    }
 
     /**
      * Get student's card
@@ -137,7 +137,7 @@ class Classeviva {
         if (data?.card && Object.keys(data?.card).length > 0) this.#updateUser(data.card);
 
         return data?.card ?? {};
-    };
+    }
 
     /**
      * Get student's grades
@@ -146,7 +146,7 @@ class Classeviva {
     async getGrades(): Promise<Grade[] | []> {
         const data: {grades: Grade[]} | void = await this.#fetch(`/grades2`);
         return data?.grades ?? [];
-    };
+    }
 
     /**
      * Get student's absences
@@ -155,7 +155,7 @@ class Classeviva {
     async getAbsences(): Promise<absences[] | []> {
         const data: {events: absences[]} | void = await this.#fetch(`/absences/details`);
         return data?.events ?? [];
-    };
+    }
 
     /**
      * Get student's agenda
@@ -175,7 +175,7 @@ class Classeviva {
 
         const data: any = await this.#fetch(`/agenda/${map[filter]}/${this.#formatDate(start)}/${this.#formatDate(end)}`);
         return data?.agenda ?? [];
-    };
+    }
 
     /**
      * Get student's documents
@@ -184,7 +184,7 @@ class Classeviva {
     async getDocuments(): Promise<any> {
         const data: any = await this.#fetch("/documents", "POST");
         return data ?? [];
-    };
+    }
 
     /**
      * Get student's noticeboard items
@@ -193,7 +193,7 @@ class Classeviva {
     async getNoticeboard(): Promise<any> {
         const data: any = await this.#fetch("/noticeboard");
         return data?.items ?? [];
-    };
+    }
 
     /**
      * Get student's books
@@ -202,7 +202,7 @@ class Classeviva {
     async getSchoolBooks(): Promise<any> {
         const data: any = await this.#fetch("/schoolbooks");
         return data?.schoolbooks ?? [];
-    };
+    }
 
     /**
      * Get student's calendar
@@ -211,7 +211,7 @@ class Classeviva {
     async getCalendar(): Promise<calendarDay[] | []> {
         const data: {calendar: calendarDay[]} | void = await this.#fetch("/calendar/all");
         return data?.calendar ?? [];
-    };
+    }
 
     /**
      * Get student's lessons
@@ -223,7 +223,7 @@ class Classeviva {
     async getLessons(today: boolean = true, start: Date = new Date(), end: Date = new Date()): Promise<any> {
         const data: any = await this.#fetch(`/lessons${today ? "/today" : `/${this.#formatDate(start)}/${this.#formatDate(end)}`}`);
         return data?.lessons ?? [];
-    };
+    }
 
     /**
      * Get student's notes
@@ -232,7 +232,7 @@ class Classeviva {
     async getNotes(): Promise<any> {
         const data: any = await this.#fetch("/notes/all");
         return data ?? [];
-    };
+    }
 
     /**
      * Get student's periods
@@ -241,7 +241,7 @@ class Classeviva {
     async getPeriods(): Promise<any> {
         const data: any = await this.#fetch("/periods");
         return data?.periods ?? [];
-    };
+    }
 
     /**
      * Get student's subjects
@@ -250,7 +250,7 @@ class Classeviva {
     async getSubjects(): Promise<any> {
         const data: any = await this.#fetch("/subjects");
         return data?.subjects ?? [];
-    };
+    }
 
     /**
      * Get student's didactics items
@@ -259,7 +259,7 @@ class Classeviva {
     async getDidactics(): Promise<any> {
         const data: any = await this.#fetch("/didactics");
         return data?.didacticts ?? [];
-    };
+    }
 
     /**
      * Get a list of the Classeviva class' functions
@@ -267,7 +267,7 @@ class Classeviva {
      */
     getMethods(): string[] {
         return Object.getOwnPropertyNames(Object.getPrototypeOf(this)).filter(prop => prop !== "constructor");
-    };
+    }
 
     /**
      * Get a list of the possible parents options for classeviva
@@ -276,7 +276,7 @@ class Classeviva {
     async getParentsOptions(): Promise<any> {
         const data: any = await this.#fetch("/_options", "GET", "parents");
         return data?.options ?? {};
-    };
+    }
 
     /**
      *  Get a list of the avaible talks with teachers on classeviva
@@ -285,7 +285,7 @@ class Classeviva {
     async getOverallTalks(): Promise<any> {
         const data: any = await this.#fetch("/overalltalks/list", "GET", "parents");
         return data?.overallTalks ?? [];
-    };
+    }
     
     /**
      *  Get a list of something regarding the talks with teachers
@@ -296,7 +296,7 @@ class Classeviva {
     async getTalks(start: Date = new Date(), end: Date = new Date()): Promise<any> {
         const data: any = await this.#fetch(`/talks/teachersframes/${this.#formatDate(start)}/${this.#formatDate(end)}`, "GET", "parents");
         return data?.teachers ?? [];
-    };
+    }
 
     /**
      *  Get auth ticket
@@ -314,7 +314,7 @@ class Classeviva {
         .catch(() => this.#log("Could not parse JSON while getting ticket ❌"));
 
         return data ?? {};
-    };
+    }
 
     /**
      *  Get the user avatar
@@ -332,7 +332,7 @@ class Classeviva {
         .catch(() => this.#log("Could not parse JSON while getting avatar ❌"));
 
         return data ?? {};
-    };
+    }
 
     /**
      * Get an overview of the day specified or the time specified
@@ -343,7 +343,7 @@ class Classeviva {
     async getOverview(start: Date = new Date(), end: Date = new Date()): Promise<Overview | {}> {
         const data: Overview | void = await this.#fetch(`/overview/all/${this.#formatDate(start)}/${this.#formatDate(end)}`);
         return data ?? {};
-    };
+    }
 
     /*/**
      * Not implemented yet 😢
@@ -365,7 +365,7 @@ class Classeviva {
     async readTalkMessage(bookingId: string) {
         const data: any = await this.#fetch(`/talks/teachermessage/${bookingId}`, "POST", "parents", JSON.stringify({"messageRead":true}));
         return data ?? {};
-    };
+    }
 
     /**
      * Checks if a document is avaible
@@ -375,7 +375,7 @@ class Classeviva {
     async checkDocument(hash: string | number): Promise<checkDocument | {}> {
         const data: checkDocument | void = await this.#fetch(`/documents/check/${hash}/`, "POST");
         return data?.document ?? {};
-    };
+    }
 
     /**
      * Book a talk with a teacher
@@ -388,7 +388,7 @@ class Classeviva {
     async bookTalk(teacherId: string | number, talkId: string | number, slot: string | number, opts: TalkOptions): Promise<any> {
         const data: any = await this.#fetch(`/talks/book/${teacherId}/${talkId}/${slot}`, "POST", "parents", JSON.stringify(opts));
         return data ?? {};
-    };
+    }
 
     /**
      * Get the list of contents that's displayed in the app (should be "Classeviva extra")
@@ -408,7 +408,7 @@ class Classeviva {
         .catch(() => this.#log("Could not parse JSON while getting content ❌"));
 
         return data ?? [];
-    };
+    }
 
     /**
      * Get infos about your agreement to the terms of classeviva. If you haven't agreed yet, this response body will be empty and the function will return an empty object.
@@ -417,7 +417,7 @@ class Classeviva {
     async getTermsAgreement(): Promise<TermsAgreementResponse | {}> {
         const data: TermsAgreementResponse | void = await this.#fetch("/getTermsAgreement", "GET", "users", undefined, true, "userIdent");
         return data ?? {};
-    };
+    }
 
     /**
      * Set the agreement to the terms of classeviva third party data colletors
@@ -428,7 +428,7 @@ class Classeviva {
         const accepted = ThirdParty ? "1" : "0";
         const data: setTermsAgreementResponse | void = await this.#fetch("/setTermsAgreement", "POST", "users", JSON.stringify({bitmask: accepted}), true, "userIdent");
         return data ?? {};
-    };
+    }
 
     /**
      * Read a notice from the school
@@ -442,7 +442,7 @@ class Classeviva {
             "Content-Type": "application/x-www-form-urlencoded"
         });
         return data ?? {};
-    };
+    }
 
     /**
      * Get the document url of a notice attachment
@@ -460,7 +460,7 @@ class Classeviva {
 
         const url = response.headers.get("Location");
         return url ?? "";
-    };
+    }
 
     /**
      * Get the status of a token
@@ -478,7 +478,7 @@ class Classeviva {
         .catch(() => this.#log("Could not parse JSON while getting token status ❌"));
 
         return data ?? {};
-    };
+    }
 
     /**
      * Read a document
@@ -488,7 +488,7 @@ class Classeviva {
     async readDocument(hash: string): Promise<Buffer> {
         const data: Buffer | void = await this.#fetch(`/documents/read/${hash}/`, "POST", "students", undefined, false);
         return data ?? Buffer.from("");
-    };
+    }
 
     /**
      * @private Updates the user object with school infos and the user type
@@ -505,7 +505,7 @@ class Classeviva {
             province: schProv,
             code: schCode
         };
-    };
+    }
 
     /**
      * @private Checks for temp file
@@ -516,7 +516,7 @@ class Classeviva {
             const temp: string = await readFileSync(`${this.#directory}/cvv.json`, "utf8");
             if (!temp) {
                 return false;
-            };
+            }
             const json = JSON.parse(temp);
 
             if (new Date(json.expire) > new Date()) {
@@ -525,8 +525,8 @@ class Classeviva {
             } else return false;
         } catch (e) {
             return false;
-        };
-    };
+        }
+    }
 
     /**
      * @private Updates user data
@@ -537,7 +537,7 @@ class Classeviva {
         if (!data) {
             this.logout();
             return;
-        };
+        }
 
         if (typeof data === "object") {
             new Date(data.expire || new Date()) > new Date() ? this.authorized = true : this.authorized = false;
@@ -552,7 +552,7 @@ class Classeviva {
             return;
         } else return;
 
-    };
+    }
 
     /**
      * @private Removes letters from a string
@@ -561,7 +561,7 @@ class Classeviva {
      */
     #removeLetters(string: string): string {
         return string.replace(/[^0-9]/g, "");
-    };
+    }
 
     /**
      * @private Formats date to string in format YYYYMMDD
@@ -573,7 +573,7 @@ class Classeviva {
         const month = date.getMonth() + 1;
         const day = date.getDate();
         return `${year}${month < 10 ? "0" + month : month}${day < 10 ? "0" + day : day}`;
-    };
+    }
 
     /**
      * @private Fetch data from the server and the specified endpoint, then returns it
@@ -606,12 +606,12 @@ class Classeviva {
         if (res.data?.error) {
             const { data } = res;
             return this.#log(`An error happened: ${data.message ? data.message : data.error.split('/').pop()} (${data.statusCode}) ❌`);
-        };
+        }
 
         if (res.status !== 200) return this.#log(`The server returned a status different from 200 (${res.status}) ❌`);
 
         return res.data;
-    };
+    }
 
     /**
      * @private Logs whatever provided
@@ -620,7 +620,7 @@ class Classeviva {
      */
     #log(...args: any[]): void {
         return console.log(`\x1b[31m[CLASSEVIVA]\x1b[0m`, ...args);
-    };
-};
+    }
+}
 
 export default Classeviva;
