@@ -1,5 +1,5 @@
 import fetch, { BodyInit, HeadersInit, RequestInit, Response } from 'node-fetch';
-import * as path from 'path';
+import { parse, join } from 'path';
 import { readFileSync, writeFileSync } from 'fs';
 import { ClassOptions, User, Headers, FetchType, FetchMethod, FetchResponse, LoginResponse, AgendaFilter, TalkOptions, Overview, Card, ContentElement, FetchId, TermsAgreementResponse, setTermsAgreementResponse, readOptions, TokenStatus, TicketResponse, checkDocument, absences, readNotice, Grade, calendarDay } from '../typings/Rest';
 import * as Enums from '../Enums';
@@ -28,7 +28,7 @@ class Classeviva {
 
         this.#state = state;
         this.#baseUrl = `https://${Enums.Urls[this.#state]}/rest/v1`;
-        this.#directory = path.parse(__dirname).dir;
+        this.#directory = join(parse(__dirname).dir, '..');
 
         this.login_timeout;
         this.expiration = "";
