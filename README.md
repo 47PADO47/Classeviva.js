@@ -15,10 +15,14 @@ A lightweight Node.js module for Classeviva / Spaggiari electronic register 📚
 ## Example
 
 ```javascript
-    const { Classeviva, Enums } = require('classeviva.js');
+    const { Rest, Enums } = require('classeviva.js');
 
-    const classeviva = new Classeviva('USERNAME / EMAIL', 'PASSWORD', Enums.States.Italy, Enums.Apps.Students);
-    //State and App are optional, they will be defaulted to Enums.States.Italy and Enums.Apps.Students if not set
+    const classeviva = new Rest({
+        username: 'USERNAME / EMAIL',
+        password: 'PASSWORD',
+        app: Enums.Apps.Students, //Optional: default is Enums.Apps.Students
+        state: Enums.States.Italy, //Optional: default is Enums.States.Italy
+    });
 
     (async () => {
         await classeviva.login();
