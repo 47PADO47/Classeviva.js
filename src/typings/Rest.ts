@@ -1,3 +1,9 @@
+interface ClassOptions {
+    username?: string;
+    password?: string;
+    state?: string;
+    app?: string;
+}
 interface User {
     name?: string;
     surname?: string;
@@ -253,6 +259,7 @@ interface calendarDay {
 }
 
 export {
+    ClassOptions,
     User,
     Headers,
     FetchType,

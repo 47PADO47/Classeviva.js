@@ -1,7 +1,7 @@
 import fetch, { BodyInit, HeadersInit, RequestInit, Response } from 'node-fetch';
 import * as path from 'path';
 import { readFileSync, writeFileSync } from 'fs';
-import { User, Headers, FetchType, FetchMethod, FetchResponse, LoginResponse, AgendaFilter, TalkOptions, Overview, Card, ContentElement, FetchId, TermsAgreementResponse, setTermsAgreementResponse, readOptions, TokenStatus, TicketResponse, checkDocument, absences, readNotice, Grade, calendarDay } from '../typings/Rest';
+import { ClassOptions, User, Headers, FetchType, FetchMethod, FetchResponse, LoginResponse, AgendaFilter, TalkOptions, Overview, Card, ContentElement, FetchId, TermsAgreementResponse, setTermsAgreementResponse, readOptions, TokenStatus, TicketResponse, checkDocument, absences, readNotice, Grade, calendarDay } from '../typings/Rest';
 import * as Enums from '../Enums';
 
 class Classeviva {
@@ -21,7 +21,7 @@ class Classeviva {
 
     readonly #app : string;
     #headers: Headers;
-    constructor(username?: string, password?: string, state: string = Enums.States.Italy, app: string = Enums.Apps.Students) {
+    constructor({ username, password, state = Enums.States.Italy, app = Enums.Apps.Students }: ClassOptions = {}) {
         this.username = username || "";
         this.#password = password || "";
         this.#token = "";
