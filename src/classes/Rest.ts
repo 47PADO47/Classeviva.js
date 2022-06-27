@@ -1,11 +1,11 @@
 import fetch, { BodyInit, HeadersInit, RequestInit, Response } from 'node-fetch';
 import * as path from 'path';
 import { readFileSync, writeFileSync } from 'fs';
-import { User, Headers, FetchType, FetchMethod, FetchResponse, LoginResponse, AgendaFilter, TalkOptions, Overview, Card, ContentElement, FetchId, TermsAgreementResponse, setTermsAgreementResponse, readOptions, TokenStatus, TicketResponse, checkDocument, absences, readNotice, Grade, calendarDay } from './struct';
-import * as Enums from './Enums';
+import { User, Headers, FetchType, FetchMethod, FetchResponse, LoginResponse, AgendaFilter, TalkOptions, Overview, Card, ContentElement, FetchId, TermsAgreementResponse, setTermsAgreementResponse, readOptions, TokenStatus, TicketResponse, checkDocument, absences, readNotice, Grade, calendarDay } from '../typings/Rest';
+import * as Enums from '../Enums';
 
 class Classeviva {
-    public username: string;
+    public readonly username: string;
     readonly #password: string;
     #token: string;
 
