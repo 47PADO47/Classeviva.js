@@ -1,13 +1,13 @@
-const { Classeviva } = require('../dist/index.js');
+const { Rest } = require('../dist/index.js');
 let cvv;
 
 beforeEach(() =>{
-    cvv = new Classeviva();
+    cvv = new Rest();
 });
 
-describe('Classeviva class creation', () => {
+describe('Classeviva REST class creation', () => {
     it('successfully initializes without configuration', () => {
-        expect(cvv).toBeInstanceOf(Classeviva);
+        expect(cvv).toBeInstanceOf(Rest);
     
         expect(cvv.username).toBeDefined();
         expect(cvv.username).toMatch('');
