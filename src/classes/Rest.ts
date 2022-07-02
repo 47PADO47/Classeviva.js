@@ -4,7 +4,7 @@ import { readFileSync, writeFileSync } from 'fs';
 import { ClassOptions, User, Headers, FetchType, FetchMethod, FetchResponse, LoginResponse, AgendaFilter, TalkOptions, Overview, Card, ContentElement, FetchId, TermsAgreementResponse, setTermsAgreementResponse, readOptions, TokenStatus, TicketResponse, checkDocument, absences, readNotice, Grade, calendarDay } from '../typings/Rest';
 import * as Enums from '../Enums';
 
-class Classeviva {
+class Rest {
     public readonly username: string;
     readonly #password: string;
     #token: string;
@@ -623,4 +623,4 @@ class Classeviva {
     }
 }
 
-export default Classeviva;
+export default Rest;
