@@ -21,5 +21,9 @@ jobs:
         run: npm ci
       - name: Build
         run: npm run build
+      - name: Authorize
+        run: : |
+          git config user.name DocsGenerator
+          git config user.email 62028267+47PADO47@users.noreply.github.com
       - name: Generate
         run: npm run update:docs
