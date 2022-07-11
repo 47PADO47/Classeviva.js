@@ -14,7 +14,7 @@ const data = {
     const dir: string = join(process.cwd(), `docs`);
     const classesPath: string = join(__dirname, 'classes');
 
-    if (!await existsOrCreate({ path: dir }) || !await existsOrCreate({ path: classesPath })) return console.log('[❌] Missing paths');
+    if (!await existsOrCreate({ path: dir }) || !await existsOrCreate({ path: classesPath })) return error('Missing paths');
 
     const classes: string[] = fs.readdirSync(classesPath).filter(file => file.endsWith('.js'));
     const files: string[] = Object.keys(data);
@@ -99,11 +99,16 @@ async function existsOrCreate({ path, type = 'dir' }: FScheckOptions): Promise<b
         }) : await fs.writeFileSync(path, '');
         return true;
     } catch (e: unknown) {
-        console.log(`[❌] Couldn't create "${path}" path\n`);
+        error(`Couldn't create "${path}" path\n`);
         return false;
     };
 };
 
-function removeExtension(str: string) {
+function removeExtension(str: string): string {
     return str.split('.')[0];
+};
+
+function error(msg: string): never {
+    console.log(`[❌] ${msg}`);
+    return process.exit(1);
 };
