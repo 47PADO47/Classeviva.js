@@ -58,7 +58,7 @@ const data = {
             console.log(`${tab}- Updated "${file}" 🆗`);
         }
         console.log(`[✅] Updated class "${cls}"`);
-    };
+    }
     await console.log('[🌐] Updated all classes');
 
     await readme(dir, readmeString);
@@ -85,10 +85,10 @@ async function readme(docsDir: string, newContent: string) {
     } else {
         console.log(`${tab}- Updating "README.md"`);
         fs.writeFileSync(path, content.replace(toReplace, `\n${newContent}`));
-    };
+    }
 
     console.log(`${tab}- Updated "README.md" ✅`);
-};
+}
 
 async function existsOrCreate({ path, type = 'dir' }: FScheckOptions): Promise<boolean> {
     if (await fs.existsSync(path)) return true;
@@ -101,9 +101,9 @@ async function existsOrCreate({ path, type = 'dir' }: FScheckOptions): Promise<b
     } catch (e: unknown) {
         console.log(`[❌] Couldn't create "${path}" path\n`);
         return false;
-    };
-};
+    }
+}
 
 function removeExtension(str: string) {
     return str.split('.')[0];
-};
+}
