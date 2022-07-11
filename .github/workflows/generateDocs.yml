@@ -3,7 +3,7 @@ name: Generate docs on push
 on:
   push:
     branches:
-      - master
+      - main
   repository_dispatch:
 
 jobs:
