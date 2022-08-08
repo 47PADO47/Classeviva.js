@@ -519,10 +519,10 @@ class Rest {
             }
             const json = JSON.parse(temp);
 
-            if (new Date(json.expire) > new Date()) {
-                this.#updateData(json);
-                return true;
-            } else return false;
+            if (new Date(json.expire) <= new Date()) return false;
+            
+            this.#updateData(json);
+            return true;
         } catch (e) {
             return false;
         }
@@ -540,7 +540,7 @@ class Rest {
         }
 
         if (typeof data !== "object") return;
-        
+
         new Date(data.expire || new Date()) > new Date() ? this.authorized = true : this.authorized = false;
         this.#token = data.token || "";
         this.user = {
