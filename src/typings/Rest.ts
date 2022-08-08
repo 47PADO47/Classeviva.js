@@ -1,3 +1,5 @@
+import { BodyInit, HeadersInit } from "node-fetch";
+
 interface ClassOptions {
     username?: string;
     password?: string;
@@ -29,6 +31,15 @@ type FetchType = "students" | "parents" | "users";
 type FetchMethod = "GET" | "POST";
 type FetchId = "userId" | "userIdent";
 
+interface FetchOptions { 
+    path?: string;
+    method?: FetchMethod;
+    type?: FetchType;
+    body?: BodyInit;
+    json?: boolean;
+    id?: FetchId;
+    customHeaders?: HeadersInit; 
+}
 interface FetchResponse {
     status: number;
     data: Json | Buffer;
@@ -262,9 +273,7 @@ export {
     ClassOptions,
     User,
     Headers,
-    FetchType,
-    FetchMethod,
-    FetchId,
+    FetchOptions,
     FetchResponse,
     LoginResponse,
     AgendaFilter,
