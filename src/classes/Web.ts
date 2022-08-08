@@ -307,6 +307,10 @@ class Web {
     return response ?? {};
   }
 
+  getMethods(): string[] {
+    return Object.getOwnPropertyNames(Object.getPrototypeOf(this)).filter(prop => prop !== "constructor");
+  }
+
   public setSessionId(token: string): void {
     this.#token = token;
     this.#setAuthorized(true);
