@@ -269,6 +269,13 @@ interface calendarDay {
     status: "HD" | "NW" | "SD"
 }
 
+interface resetPassword {
+    status: boolean,
+    data: 0,
+    err: string,
+    htm: string,
+}
+
 export {
     ClassOptions,
     User,
@@ -290,5 +297,6 @@ export {
     absences,
     readNotice,
     Grade,
-    calendarDay
+    calendarDay,
+    resetPassword
 };
