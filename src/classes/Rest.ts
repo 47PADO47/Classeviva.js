@@ -530,7 +530,7 @@ class Rest {
 
     /**
      * @private Updates user data
-     * @param {object} data user data to update
+     * @param {LoginResponse} data user data to update
      * @returns {void}
      */
     #updateData(data: LoginResponse): void {
@@ -539,19 +539,18 @@ class Rest {
             return;
         }
 
-        if (typeof data === "object") {
-            new Date(data.expire || new Date()) > new Date() ? this.authorized = true : this.authorized = false;
-            this.#token = data.token || "";
-            this.user = {
-                name: data.firstName,
-                surname: data.lastName,
-                id: this.#removeLetters(data.ident || ""),
-                ident: data.ident,
-            };
-            this.expiration = data.expire || `${new Date().getFullYear()}-${new Date().getMonth()}-${new Date().getDate()}T${new Date().getHours()}:${new Date().getMinutes()}:${new Date().getSeconds()}+01:00`;
-            return;
-        } else return;
-
+        if (typeof data !== "object") return;
+        
+        new Date(data.expire || new Date()) > new Date() ? this.authorized = true : this.authorized = false;
+        this.#token = data.token || "";
+        this.user = {
+            name: data.firstName,
+            surname: data.lastName,
+            id: this.#removeLetters(data.ident || ""),
+            ident: data.ident,
+        };
+        this.expiration = data.expire || `${new Date().getFullYear()}-${new Date().getMonth()}-${new Date().getDate()}T${new Date().getHours()}:${new Date().getMinutes()}:${new Date().getSeconds()}+01:00`;
+        return;
     }
 
     /**
