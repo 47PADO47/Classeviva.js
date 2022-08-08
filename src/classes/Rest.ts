@@ -1,7 +1,7 @@
 import fetch, { HeadersInit, RequestInit, Response } from 'node-fetch';
 import { parse, join } from 'path';
 import { readFileSync, writeFileSync } from 'fs';
-import { ClassOptions, User, Headers, FetchResponse, LoginResponse, AgendaFilter, TalkOptions, Overview, Card, ContentElement, TermsAgreementResponse, setTermsAgreementResponse, readOptions, TokenStatus, TicketResponse, checkDocument, absences, readNotice, Grade, calendarDay, FetchOptions } from '../typings/Rest';
+import { ClassOptions, User, Headers, FetchResponse, LoginResponse, AgendaFilter, TalkOptions, Overview, Card, ContentElement, TermsAgreementResponse, setTermsAgreementResponse, readOptions, TokenStatus, TicketResponse, checkDocument, absences, readNotice, Grade, calendarDay, FetchOptions, resetPassword } from '../typings/Rest';
 import * as Enums from '../Enums';
 
 class Rest {
@@ -491,6 +491,28 @@ class Rest {
         const data: Buffer | void = await this.#fetch({ path: `/documents/read/${hash}/`, method: "POST", type: "students", body: undefined, json: false });
         return data ?? Buffer.from("");
     }
+
+    async resetPassword(email: string): Promise<resetPassword | void> {
+        if (!this.authorized) return this.#log("Not authorized ❌");
+
+        const headers = Object.assign({ "Z-Auth-Token": this.#token }, {
+            ...this.#headers,
+            "Content-Type": "application/x-www-form-urlencoded",
+            "Accept": "application/json",
+            "X-Requested-With": "XMLHttpRequest"
+        });
+        
+        const res: Response = await fetch(`${this.#baseUrl.split('rest')[0]}sso/app/default/sam.php?a=akRSPWRQ`, {
+            method: "POST",
+            body: `eml=${email}`,
+            headers
+        });
+
+        const data: resetPassword = await res.json()
+        .catch(() => this.#log("Could not parse JSON while resetting password ❌"));
+
+        return data ?? {};
+    };
 
     /**
      * @private Updates the user object with school infos and the user type
