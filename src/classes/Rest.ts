@@ -1,7 +1,7 @@
-import fetch, { BodyInit, HeadersInit, RequestInit, Response } from 'node-fetch';
+import fetch, { HeadersInit, RequestInit, Response } from 'node-fetch';
 import { parse, join } from 'path';
 import { readFileSync, writeFileSync } from 'fs';
-import { ClassOptions, User, Headers, FetchType, FetchMethod, FetchResponse, LoginResponse, AgendaFilter, TalkOptions, Overview, Card, ContentElement, FetchId, TermsAgreementResponse, setTermsAgreementResponse, readOptions, TokenStatus, TicketResponse, checkDocument, absences, readNotice, Grade, calendarDay } from '../typings/Rest';
+import { ClassOptions, User, Headers, FetchResponse, LoginResponse, AgendaFilter, TalkOptions, Overview, Card, ContentElement, TermsAgreementResponse, setTermsAgreementResponse, readOptions, TokenStatus, TicketResponse, checkDocument, absences, readNotice, Grade, calendarDay, FetchOptions } from '../typings/Rest';
 import * as Enums from '../Enums';
 
 class Rest {
@@ -122,7 +122,7 @@ class Rest {
      * @returns {object[]} Array of objects containing the student's cards
      */
     async getCards(): Promise<Card[] | []> {
-        const data: { cards?: Card[] } | void = await this.#fetch("/cards");
+        const data: { cards?: Card[] } | void = await this.#fetch({ path: "/cards" });
         if (data?.cards && data?.cards?.length > 0) this.#updateUser(data.cards[0]);
         
         return data?.cards ?? [];
@@ -133,7 +133,7 @@ class Rest {
      * @returns {object} Object containing the student's card
      */
     async getCard(): Promise<Card | {}> {
-        const data: { card?: Card } | void = await this.#fetch("/card");
+        const data: { card?: Card } | void = await this.#fetch({ path: "/card" });
         if (data?.card && Object.keys(data?.card).length > 0) this.#updateUser(data.card);
 
         return data?.card ?? {};
@@ -144,7 +144,7 @@ class Rest {
      * @returns {object[]} Array of objects containing the student's grades
      */
     async getGrades(): Promise<Grade[] | []> {
-        const data: {grades: Grade[]} | void = await this.#fetch(`/grades2`);
+        const data: {grades: Grade[]} | void = await this.#fetch({ path: `/grades2` });
         return data?.grades ?? [];
     }
 
@@ -153,7 +153,7 @@ class Rest {
      * @returns {object[]} Array of objects containing the student's absences
      */
     async getAbsences(): Promise<absences[] | []> {
-        const data: {events: absences[]} | void = await this.#fetch(`/absences/details`);
+        const data: {events: absences[]} | void = await this.#fetch({ path: `/absences/details` });
         return data?.events ?? [];
     }
 
@@ -173,7 +173,7 @@ class Rest {
             other: "AGNT",
         };
 
-        const data: any = await this.#fetch(`/agenda/${map[filter]}/${this.#formatDate(start)}/${this.#formatDate(end)}`);
+        const data: any = await this.#fetch({ path: `/agenda/${map[filter]}/${this.#formatDate(start)}/${this.#formatDate(end)}` });
         return data?.agenda ?? [];
     }
 
@@ -182,7 +182,7 @@ class Rest {
      * @returns {object[]} Array of objects containing the student's documents
      */
     async getDocuments(): Promise<any> {
-        const data: any = await this.#fetch("/documents", "POST");
+        const data: any = await this.#fetch({ path: "/documents", method: "POST" });
         return data ?? [];
     }
 
@@ -191,7 +191,7 @@ class Rest {
      * @returns {object[]} Array of objects containing the student's noticeboard items
      */
     async getNoticeboard(): Promise<any> {
-        const data: any = await this.#fetch("/noticeboard");
+        const data: any = await this.#fetch({ path: "/noticeboard" });
         return data?.items ?? [];
     }
 
@@ -200,7 +200,7 @@ class Rest {
      * @returns {object[]} Array of objects containing the student's books
      */
     async getSchoolBooks(): Promise<any> {
-        const data: any = await this.#fetch("/schoolbooks");
+        const data: any = await this.#fetch({ path: "/schoolbooks" });
         return data?.schoolbooks ?? [];
     }
 
@@ -209,7 +209,7 @@ class Rest {
      * @returns {object[]} Array of objects containing the student's calendar
      */
     async getCalendar(): Promise<calendarDay[] | []> {
-        const data: {calendar: calendarDay[]} | void = await this.#fetch("/calendar/all");
+        const data: {calendar: calendarDay[]} | void = await this.#fetch({ path: "/calendar/all" });
         return data?.calendar ?? [];
     }
 
@@ -221,7 +221,7 @@ class Rest {
      * @returns {object[]} Array of objects containing the student's lessons
      */
     async getLessons(today: boolean = true, start: Date = new Date(), end: Date = new Date()): Promise<any> {
-        const data: any = await this.#fetch(`/lessons${today ? "/today" : `/${this.#formatDate(start)}/${this.#formatDate(end)}`}`);
+        const data: any = await this.#fetch({ path: `/lessons${today ? "/today" : `/${this.#formatDate(start)}/${this.#formatDate(end)}`}` });
         return data?.lessons ?? [];
     }
 
@@ -230,7 +230,7 @@ class Rest {
      * @returns {object[]} Array of objects containing the student's notes
      */
     async getNotes(): Promise<any> {
-        const data: any = await this.#fetch("/notes/all");
+        const data: any = await this.#fetch({ path: "/notes/all" });
         return data ?? [];
     }
 
@@ -239,7 +239,7 @@ class Rest {
      * @returns {object[]} Array of objects containing the student's periods
      */
     async getPeriods(): Promise<any> {
-        const data: any = await this.#fetch("/periods");
+        const data: any = await this.#fetch({ path: "/periods" });
         return data?.periods ?? [];
     }
 
@@ -248,7 +248,7 @@ class Rest {
      * @returns {object[]} Array of objects containing the student's subjects
      */
     async getSubjects(): Promise<any> {
-        const data: any = await this.#fetch("/subjects");
+        const data: any = await this.#fetch({ path: "/subjects" });
         return data?.subjects ?? [];
     }
 
@@ -257,7 +257,7 @@ class Rest {
      * @returns {object[]} Array of objects containing the student's didactics items
      */
     async getDidactics(): Promise<any> {
-        const data: any = await this.#fetch("/didactics");
+        const data: any = await this.#fetch({ path: "/didactics" });
         return data?.didacticts ?? [];
     }
 
@@ -274,7 +274,7 @@ class Rest {
      * @returns {object} An object containing all the possible parents options for classeviva
      */
     async getParentsOptions(): Promise<any> {
-        const data: any = await this.#fetch("/_options", "GET", "parents");
+        const data: any = await this.#fetch({ path: "/_options", method: "GET", type: "parents" });
         return data?.options ?? {};
     }
 
@@ -283,7 +283,7 @@ class Rest {
      * @returns {object[]} An array of objects containing data about the avaible talks with teachers for classeviva
      */
     async getOverallTalks(): Promise<any> {
-        const data: any = await this.#fetch("/overalltalks/list", "GET", "parents");
+        const data: any = await this.#fetch({ path: "/overalltalks/list", method: "GET", type: "parents" });
         return data?.overallTalks ?? [];
     }
     
@@ -294,7 +294,7 @@ class Rest {
      * @returns {object[]} An array of objects containing data about the talks with teachers for classeviva
      */
     async getTalks(start: Date = new Date(), end: Date = new Date()): Promise<any> {
-        const data: any = await this.#fetch(`/talks/teachersframes/${this.#formatDate(start)}/${this.#formatDate(end)}`, "GET", "parents");
+        const data: any = await this.#fetch({ path: `/talks/teachersframes/${this.#formatDate(start)}/${this.#formatDate(end)}`, method: "GET", type: "parents" });
         return data?.teachers ?? [];
     }
 
@@ -341,7 +341,7 @@ class Rest {
      * @returns {object} An object containing data about the overview of a day or the time specified
      */
     async getOverview(start: Date = new Date(), end: Date = new Date()): Promise<Overview | {}> {
-        const data: Overview | void = await this.#fetch(`/overview/all/${this.#formatDate(start)}/${this.#formatDate(end)}`);
+        const data: Overview | void = await this.#fetch({ path: `/overview/all/${this.#formatDate(start)}/${this.#formatDate(end)}` });
         return data ?? {};
     }
 
@@ -363,7 +363,7 @@ class Rest {
      * @returns {object}
      */
     async readTalkMessage(bookingId: string) {
-        const data: any = await this.#fetch(`/talks/teachermessage/${bookingId}`, "POST", "parents", JSON.stringify({"messageRead":true}));
+        const data: any = await this.#fetch({ path: `/talks/teachermessage/${bookingId}`, method: "POST", type: "parents", body: JSON.stringify({ "messageRead": true }) });
         return data ?? {};
     }
 
@@ -373,7 +373,7 @@ class Rest {
      * @returns {object} An object containing data about the document
      */
     async checkDocument(hash: string | number): Promise<checkDocument | {}> {
-        const data: checkDocument | void = await this.#fetch(`/documents/check/${hash}/`, "POST");
+        const data: checkDocument | void = await this.#fetch({ path: `/documents/check/${hash}/`, method: "POST" });
         return data?.document ?? {};
     }
 
@@ -386,7 +386,7 @@ class Rest {
      * @returns {object} An object containing data about the booked talk
      */
     async bookTalk(teacherId: string | number, talkId: string | number, slot: string | number, opts: TalkOptions): Promise<any> {
-        const data: any = await this.#fetch(`/talks/book/${teacherId}/${talkId}/${slot}`, "POST", "parents", JSON.stringify(opts));
+        const data: any = await this.#fetch({ path: `/talks/book/${teacherId}/${talkId}/${slot}`, method: "POST", type: "parents", body: JSON.stringify(opts) });
         return data ?? {};
     }
 
@@ -415,7 +415,7 @@ class Rest {
      * @returns {object} An object containing data about the agreement to the terms of classeviva
      */
     async getTermsAgreement(): Promise<TermsAgreementResponse | {}> {
-        const data: TermsAgreementResponse | void = await this.#fetch("/getTermsAgreement", "GET", "users", undefined, true, "userIdent");
+        const data: TermsAgreementResponse | void = await this.#fetch({ path: "/getTermsAgreement", method: "GET", type: "users", body: undefined, json: true, id: "userIdent" });
         return data ?? {};
     }
 
@@ -426,7 +426,7 @@ class Rest {
      */
     async setTermsAgreement(ThirdParty: boolean = false): Promise<setTermsAgreementResponse | {}> {
         const accepted = ThirdParty ? "1" : "0";
-        const data: setTermsAgreementResponse | void = await this.#fetch("/setTermsAgreement", "POST", "users", JSON.stringify({bitmask: accepted}), true, "userIdent");
+        const data: setTermsAgreementResponse | void = await this.#fetch({ path: "/setTermsAgreement", method: "POST", type: "users", body: JSON.stringify({ bitmask: accepted }), json: true, id: "userIdent" });
         return data ?? {};
     }
 
@@ -438,9 +438,11 @@ class Rest {
      * @returns {object} An object containing data about the notice
      */
     async readNotice(eventCode: string, id: string | number, options: readOptions = {}): Promise<readNotice | {}> {
-        const data: readNotice | void = await this.#fetch(`/noticeboard/read/${eventCode}/${id}/101`, "POST", "students", options ? JSON.stringify(options) : "", true, "userId", {
-            "Content-Type": "application/x-www-form-urlencoded"
-        });
+        const data: readNotice | void = await this.#fetch({
+                path: `/noticeboard/read/${eventCode}/${id}/101`, method: "POST", type: "students", body: options ? JSON.stringify(options) : "", json: true, id: "userId", customHeaders: {
+                    "Content-Type": "application/x-www-form-urlencoded"
+                }
+            });
         return data ?? {};
     }
 
@@ -486,7 +488,7 @@ class Rest {
      * @returns {Buffer} The document
      */
     async readDocument(hash: string): Promise<Buffer> {
-        const data: Buffer | void = await this.#fetch(`/documents/read/${hash}/`, "POST", "students", undefined, false);
+        const data: Buffer | void = await this.#fetch({ path: `/documents/read/${hash}/`, method: "POST", type: "students", body: undefined, json: false });
         return data ?? Buffer.from("");
     }
 
@@ -582,13 +584,21 @@ class Rest {
      * @param {string} [body] body to send
      * @param {boolean} [json] if the data should be parsed to json
      * @param {string} [id] user identifier
-     * @param {object} [head] additional headers to send
+     * @param {object} [customHeaders] additional headers to send
      * @returns {Promise<any>} the response
      */
-    async #fetch<TResponse>(path: string = "/", method: FetchMethod = "GET", type: FetchType = "students", body: BodyInit = "", json: boolean = true, id: FetchId = "userId", head: HeadersInit = {}): Promise<TResponse | void> {
+    async #fetch<TResponse>({
+        path = "/",
+        method = "GET",
+        type = "students",
+        body = "",
+        json = true,
+        id = "userId",
+        customHeaders = {}
+    }: FetchOptions = {}): Promise<TResponse | void> {
         if (!this.authorized) return this.#log("Not logged in ❌");
 
-        const headers: HeadersInit = Object.assign(this.#headers, { "Z-Auth-Token": this.#token, ...head });
+        const headers: HeadersInit = Object.assign(this.#headers, { "Z-Auth-Token": this.#token, ...customHeaders });
         const options: RequestInit = {
             method: method.toUpperCase(),
             headers,
