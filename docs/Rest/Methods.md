@@ -65,3 +65,5 @@
 > getTokenStatus
 
 > readDocument
+
+> resetPassword

@@ -32,6 +32,8 @@
 
 > getAccountInfo
 
+> getMethods
+
 > setSessionId
 
 > msToUnix
