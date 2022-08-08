@@ -512,7 +512,7 @@ class Rest {
         .catch(() => this.#log("Could not parse JSON while resetting password ❌"));
 
         return data ?? {};
-    };
+    }
 
     /**
      * @private Updates the user object with school infos and the user type
