@@ -18,10 +18,13 @@ export interface IApps {
 };
 
 export const Apps: Readonly<IApps> = Object.freeze({
-    Students: "CVVS/studente/4.1.5",
-    Family: "CVVS/famiglia/4.1.5",
+    Students: "CVVS/studente/4.1.8",
+    Family: "CVVS/famiglia/4.1.8",
     Aant: "CVVS/aant/2.1.2",
     Teachers: "CVVS/docente/2.1.4",
+    Inalpi: "classevivaInalpi/3.1.7",
+    Tibidabo: "Il Social/1.205",
+    CatalogoSpaggiari: "CatalogoSpaggiari iPad User Agent ;)"
 });
 
 export interface IUrls {
