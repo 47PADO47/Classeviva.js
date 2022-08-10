@@ -37,13 +37,16 @@ export const Urls: Readonly<IUrls> = Object.freeze({
     AR: "ar.spaggiari.eu",
 });
 
-export interface IUsers {
+export type userTypesKeys = 'S' | 'G' | 'A' | 'X';
+
+export type IUsers = {
     [key: string]: string;
-}
+};
 
 export const UserTypes: Readonly<IUsers> = {
     S: "studente",
     G: "genitore",
+    A: "insegnante",
 };
 
 export default {
