@@ -62,6 +62,7 @@ const data = {
     await console.log('[🌐] Updated all classes');
 
     await readme(dir, readmeString);
+    await examples(dir);
 
     return console.log('[📃] Updated all files');
 })();
@@ -90,6 +91,38 @@ async function readme(docsDir: string, newContent: string) {
     console.log(`${tab}- Updated "README.md" ✅`);
 }
 
+async function examples(docsDir: string) {
+    console.log('[📦] Updating examples...');
+    const path = join(docsDir, 'Examples');
+    await existsOrCreate({
+        path,
+        type: 'dir'
+    });
+
+    let string = "";
+    const examples = fs.readdirSync(path);
+    examples.forEach(async (example: string) => {
+        string+=`\n• [${removeExtension(example)}](docs/Examples/${example})\n`
+        console.log(`${tab}- Added example "${example}" 🆗`);
+    });
+
+    if (!string.length) {
+        string = '\nThere are no examples yet.\n';
+        console.log(`${tab}- "Examples" folder is empty ⚠️`);
+    }
+
+    const readmePath = join(process.cwd(), 'README.md');
+    const readmeContent = await fs.readFileSync(readmePath, 'utf-8');
+    const split: string[] = readmeContent.split(`## Examples`);
+
+    if (split.length === 0) return error('Couldn\'t find "Examples" section in README.md');
+    const toReplace = split.pop()?.split('##')[0] ?? '';
+    fs.writeFileSync(readmePath, readmeContent.replace(toReplace, `\n${string}\n`));
+
+    console.log('[✅] Updated examples');
+    return;
+}
+
 async function existsOrCreate({ path, type = 'dir' }: FScheckOptions): Promise<boolean> {
     if (await fs.existsSync(path)) return true;
 
@@ -100,7 +133,6 @@ async function existsOrCreate({ path, type = 'dir' }: FScheckOptions): Promise<b
         return true;
     } catch (e: unknown) {
         error(`Couldn't create "${path}" path\n`);
-        return false;
     }
 }
 
