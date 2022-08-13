@@ -121,7 +121,7 @@ class Rest {
      * Get student's cards
      * @returns {object[]} Array of objects containing the student's cards
      */
-    async getCards(): Promise<Card[] | []> {
+    async getCards(): Promise<Card[]> {
         const data: { cards?: Card[] } | void = await this.#fetch({ path: "/cards" });
         if (data?.cards && data?.cards?.length > 0) this.#updateUser(data.cards[0]);
         
@@ -132,18 +132,18 @@ class Rest {
      * Get student's card
      * @returns {object} Object containing the student's card
      */
-    async getCard(): Promise<Card | {}> {
+    async getCard(): Promise<Card | undefined> {
         const data: { card?: Card } | void = await this.#fetch({ path: "/card" });
-        if (data?.card && Object.keys(data?.card).length > 0) this.#updateUser(data.card);
+        if (data?.card && Object.keys(data?.card ?? {}).length > 0) this.#updateUser(data.card);
 
-        return data?.card ?? {};
+        return data?.card;
     }
 
     /**
      * Get student's grades
      * @returns {object[]} Array of objects containing the student's grades
      */
-    async getGrades(): Promise<Grade[] | []> {
+    async getGrades(): Promise<Grade[]> {
         const data: {grades: Grade[]} | void = await this.#fetch({ path: `/grades2` });
         return data?.grades ?? [];
     }
@@ -152,7 +152,7 @@ class Rest {
      * Get student's absences
      * @returns {object[]} Array of objects containing the student's absences
      */
-    async getAbsences(): Promise<absences[] | []> {
+    async getAbsences(): Promise<absences[]> {
         const data: {events: absences[]} | void = await this.#fetch({ path: `/absences/details` });
         return data?.events ?? [];
     }
@@ -208,7 +208,7 @@ class Rest {
      * Get student's calendar
      * @returns {object[]} Array of objects containing the student's calendar
      */
-    async getCalendar(): Promise<calendarDay[] | []> {
+    async getCalendar(): Promise<calendarDay[]> {
         const data: {calendar: calendarDay[]} | void = await this.#fetch({ path: "/calendar/all" });
         return data?.calendar ?? [];
     }
@@ -340,9 +340,10 @@ class Rest {
      * @param {Date} end The end date of the overview (defaults to today)
      * @returns {object} An object containing data about the overview of a day or the time specified
      */
-    async getOverview(start: Date = new Date(), end: Date = new Date()): Promise<Overview | {}> {
+    async getOverview(start: Date = new Date(), end: Date = new Date()): Promise<Overview | undefined> {
         const data: Overview | void = await this.#fetch({ path: `/overview/all/${this.#formatDate(start)}/${this.#formatDate(end)}` });
-        return data ?? {};
+        if (typeof data === "undefined") return undefined;
+        return data;
     }
 
     /*/**
@@ -372,9 +373,9 @@ class Rest {
      * @param {string | number} hash The hash of the document
      * @returns {object} An object containing data about the document
      */
-    async checkDocument(hash: string | number): Promise<checkDocument | {}> {
+    async checkDocument(hash: string | number): Promise<{ avaible: boolean }> {
         const data: checkDocument | void = await this.#fetch({ path: `/documents/check/${hash}/`, method: "POST" });
-        return data?.document ?? {};
+        return data?.document ?? { avaible: false };
     }
 
     /**
@@ -395,7 +396,7 @@ class Rest {
      * @param {boolean} common idk, defaults to true
      * @returns {object[]} An array of objects containing data about the contents that's displayed in the app
      */
-    async getContents(common = true): Promise<ContentElement[] | [] | void> {
+    async getContents(common = true): Promise<ContentElement[] | void> {
         if (!this.authorized) return this.#log("Not authorized ❌");
         if (!this.user.school?.code) return this.#log("No school code, please update using getCard() or getCards() ❌");
 
@@ -414,9 +415,10 @@ class Rest {
      * Get infos about your agreement to the terms of classeviva. If you haven't agreed yet, this response body will be empty and the function will return an empty object.
      * @returns {object} An object containing data about the agreement to the terms of classeviva
      */
-    async getTermsAgreement(): Promise<TermsAgreementResponse | {}> {
+    async getTermsAgreement(): Promise<TermsAgreementResponse | undefined> {
         const data: TermsAgreementResponse | void = await this.#fetch({ path: "/getTermsAgreement", method: "GET", type: "users", body: undefined, json: true, id: "userIdent" });
-        return data ?? {};
+        if (typeof data === "undefined") return undefined;
+        return data;
     }
 
     /**
@@ -424,10 +426,10 @@ class Rest {
      * @param {boolean} ThirdParty Whether you agree to the terms of classeviva third party data colletors, defaults to true
      * @returns {object} An object with the property "msg": "ok" if the agreement was set successfully
      */
-    async setTermsAgreement(ThirdParty: boolean = false): Promise<setTermsAgreementResponse | {}> {
+    async setTermsAgreement(ThirdParty: boolean = false): Promise<setTermsAgreementResponse> {
         const accepted = ThirdParty ? "1" : "0";
         const data: setTermsAgreementResponse | void = await this.#fetch({ path: "/setTermsAgreement", method: "POST", type: "users", body: JSON.stringify({ bitmask: accepted }), json: true, id: "userIdent" });
-        return data ?? {};
+        return data ?? { msg: "NOT OK" };
     }
 
     /**
@@ -437,13 +439,15 @@ class Rest {
      * @param {object} options { sign, join, text }
      * @returns {object} An object containing data about the notice
      */
-    async readNotice(eventCode: string, id: string | number, options: readOptions = {}): Promise<readNotice | {}> {
+    async readNotice(eventCode: string, id: string | number, options: readOptions = {}): Promise<readNotice | undefined> {
         const data: readNotice | void = await this.#fetch({
                 path: `/noticeboard/read/${eventCode}/${id}/101`, method: "POST", type: "students", body: options ? JSON.stringify(options) : "", json: true, id: "userId", customHeaders: {
                     "Content-Type": "application/x-www-form-urlencoded"
                 }
             });
-        return data ?? {};
+        
+        if (typeof data === "undefined") return undefined;
+        return data;
     }
 
     /**
@@ -469,7 +473,7 @@ class Rest {
      * @param {string} token token to check, defaults to the token of the user
      * @returns {object} An object containing data about the token
      */
-    async getTokenStatus(token = this.#token): Promise<TokenStatus | {} | void> {
+    async getTokenStatus(token = this.#token): Promise<TokenStatus | void> {
         if (!this.authorized || !token) return this.#log("Not authorized ❌");
 
         const headers = Object.assign({ "Z-Auth-Token": token }, this.#headers);
