@@ -105,7 +105,7 @@ class Web {
       type: "",
     };
     return !this.authorized;
-  };
+  }
 
   async getAgenda(
     start: Date = new Date(),
