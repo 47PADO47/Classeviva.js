@@ -70,7 +70,7 @@ class Web {
       .json()
       .catch(() => this.#error("Could not parse JSON"));
 
-    if (json.error && json.error.length > 0) return this.#error(json.error);
+    if (json?.error && json.error?.length > 0) return this.#error(json.error);
 
     const cookies = response.headers.get("Set-Cookie");
     const cookie = cookies?.split(", ").pop();
@@ -105,7 +105,7 @@ class Web {
       type: "",
     };
     return !this.authorized;
-  };
+  }
 
   async getAgenda(
     start: Date = new Date(),
