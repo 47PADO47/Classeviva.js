@@ -3,7 +3,7 @@ A lightweight Node.js module for Classeviva / Spaggiari electronic register 📚
 
 ## Table Of Contents
   - [Installation](#installation)
-  - [Example](#example)
+  - [Examples](#examples)
   - [Docs](#docs)
 
 ## Installation
@@ -12,32 +12,9 @@ A lightweight Node.js module for Classeviva / Spaggiari electronic register 📚
     npm install classeviva.js
 ```
 
-## Example
+## Examples
 
-```javascript
-    const { Rest, Enums } = require('classeviva.js');
 
-    const classeviva = new Rest({
-        username: 'USERNAME / EMAIL',
-        password: 'PASSWORD',
-        app: Enums.Apps.Students, //Optional: default is Enums.Apps.Students
-        state: Enums.States.Italy, //Optional: default is Enums.States.Italy
-    });
-
-    (async () => {
-        await classeviva.login();
-
-        classeviva.getAbsences()
-        .then(absences => {
-            console.log(`You were absent in school ${absences.length} times`);
-        });
-
-        setTimeout(() => {
-            classeviva.logout();
-            process.exit();
-        }, 3500);
-    })();
-```
 
 ## Docs
 
