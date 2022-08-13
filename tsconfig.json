@@ -18,7 +18,7 @@
         "alwaysStrict": true,
         "pretty": true,
         "outDir": "dist",
-        "incremental": true,
+        "incremental": false,
         "noEmitHelpers": true,
         "importHelpers": true,
         "skipLibCheck": true,
