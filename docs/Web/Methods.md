@@ -2,6 +2,8 @@
 
 > login
 
+> logout
+
 > getAgenda
 
 > getPortfolio

@@ -14,7 +14,7 @@ A lightweight Node.js module for Classeviva / Spaggiari electronic register 📚
 
 ## Examples
 
-
+There are no examples yet.
 
 ## Docs
 
