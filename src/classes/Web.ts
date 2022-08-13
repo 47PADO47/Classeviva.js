@@ -89,6 +89,24 @@ class Web {
     return this.authorized;
   }
 
+  logout() {
+    if (!this.authorized) {
+        this.#error("Already logged out");
+        return false;
+    }
+    
+    this.#token = "";
+    this.authorized = false;
+    this.user = {
+      cid: "",
+      cognome: "",
+      nome: "",
+      id: 0,
+      type: "",
+    };
+    return !this.authorized;
+  };
+
   async getAgenda(
     start: Date = new Date(),
     end: Date = new Date(),
