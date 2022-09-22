@@ -60,9 +60,9 @@ class Rest {
      * @returns {object} user object
      */
     async login(username = this.username, password = this.#password): Promise<void | User> {
-        if (this.authorized) return this.#log("Already logged in ❌");
+        if (this.authorized) return this.#error("Already logged in ❌");
 
-        if (!username || !password) return this.#log("Username or password not set ❌");
+        if (!username || !password) return this.#error("Username or password not set ❌");
 
         if (!await this.#checkTemp()) {
             const userData = {
@@ -79,18 +79,17 @@ class Rest {
             const json: any = await response.json();
     
             if (json.error) {
-                this.#log(`An error happened: ${json.message} (${json.statusCode}) ❌`);
                 this.authorized = false;
-                return;
+                return this.#error(`An error happened: ${json.message} (${json.statusCode}) ❌`);
             }
 
-            if (response.status !== 200) return this.#log(`The server returned a status code other than 200 (${response.status}) ❌`);
+            if (response.status !== 200) return this.#error(`The server returned a status code other than 200 (${response.status}) ❌`);
             
             this.#updateData(json);
             await writeFileSync(`${this.#directory}/cvv.json`, JSON.stringify(json, null, 2));
         }
 
-        if (!this.authorized) return this.#log("Failed to login ❌");
+        if (!this.authorized) return this.#error("Failed to login ❌");
 
         this.#log(`Successfully logged in as "${this.user.name} ${this.user.surname}" ✅`);
         this.login_timeout = setTimeout(() => {
@@ -101,13 +100,10 @@ class Rest {
 
     /**
      * Logs out from Classeviva
-     * @returns {boolean} true if logged out, false if already logged out
+     * @returns {boolean} true if logged out, error if already logged out
      */
-    logout(): boolean {
-        if (!this.authorized) {
-            this.#log("Already logged out ❌");
-            return false;
-        }
+    logout(): true | Promise<never> {
+        if (!this.authorized) return this.#error("Already logged out ❌");
         clearTimeout(this.login_timeout);
         this.authorized = false;
         this.#token = "";
@@ -166,7 +162,7 @@ class Rest {
      */
     async getAgenda(filter: AgendaFilter = "all", start: Date = new Date(), end: Date = new Date()): Promise<any> {
         const filters = ["all", "homework", "other"];
-        if (!filters.includes(filter)) return this.#log("Invalid filter ❌");
+        if (!filters.includes(filter)) return this.#error("Invalid filter ❌");
         const map = {
             all: "all",
             homework: "AGHW",
@@ -303,7 +299,7 @@ class Rest {
      * @returns {object} An object containing data about the auth ticket
      */
     async getTicket(): Promise<TicketResponse | void> {
-        if (!this.authorized) return this.#log("Not authorized ❌");
+        if (!this.authorized) return this.#error("Not authorized ❌");
 
         const headers = Object.assign({ "Z-Auth-Token": this.#token }, this.#headers);
         const res: Response = await fetch(`${this.#baseUrl}/auth/ticket`, {
@@ -311,7 +307,7 @@ class Rest {
         });
 
         const data: TicketResponse = await res.json()
-        .catch(() => this.#log("Could not parse JSON while getting ticket ❌"));
+        .catch(() => this.#error("Could not parse JSON while getting ticket ❌"));
 
         return data ?? {};
     }
@@ -321,7 +317,7 @@ class Rest {
      * @returns {unknown} The user avatar (not tested)
      */
     async getAvatar(): Promise<any> {
-        if (!this.authorized) return this.#log("Not authorized ❌");
+        if (!this.authorized) return this.#error("Not authorized ❌");
 
         const headers = Object.assign({ "Z-Auth-Token": this.#token }, this.#headers);
         const res: Response = await fetch(`${this.#baseUrl}/auth/avatar`, {
@@ -329,7 +325,7 @@ class Rest {
         });
 
         const data: any = await res.json()
-        .catch(() => this.#log("Could not parse JSON while getting avatar ❌"));
+        .catch(() => this.#error("Could not parse JSON while getting avatar ❌"));
 
         return data ?? {};
     }
@@ -397,8 +393,8 @@ class Rest {
      * @returns {object[]} An array of objects containing data about the contents that's displayed in the app
      */
     async getContents(common = true): Promise<ContentElement[] | void> {
-        if (!this.authorized) return this.#log("Not authorized ❌");
-        if (!this.user.school?.code) return this.#log("No school code, please update using getCard() or getCards() ❌");
+        if (!this.authorized) return this.#error("Not authorized ❌");
+        if (!this.user.school?.code) return this.#error("No school code, please update using getCard() or getCards() ❌");
 
         const headers = Object.assign({ "Z-Auth-Token": this.#token }, this.#headers);
         const response: Response = await fetch(`https://${Enums.Urls[this.#state]}/gek/api/v1/${this.user.school.code}/2021/students/contents?common=${common}`, {
@@ -406,7 +402,7 @@ class Rest {
         });
 
         const data: ContentElement[] = await response.json()
-        .catch(() => this.#log("Could not parse JSON while getting content ❌"));
+        .catch(() => this.#error("Could not parse JSON while getting content ❌"));
 
         return data ?? [];
     }
@@ -457,7 +453,7 @@ class Rest {
      * @returns {string} The url of the document
      */
     async getNoticeDocumentUrl(eventCode: string, id: string | number): Promise<string | void> {
-        if (!this.authorized) return this.#log("Not authorized ❌");
+        if (!this.authorized) return this.#error("Not authorized ❌");
 
         const headers = Object.assign({ "Z-Auth-Token": this.#token }, this.#headers);
         const response: Response = await fetch(`${this.#baseUrl}/students/${this.user.ident}/noticeboard/attach/${eventCode}/${id}/`, {
@@ -474,14 +470,14 @@ class Rest {
      * @returns {object} An object containing data about the token
      */
     async getTokenStatus(token = this.#token): Promise<TokenStatus | void> {
-        if (!this.authorized || !token) return this.#log("Not authorized ❌");
+        if (!this.authorized || !token) return this.#error("Not authorized ❌");
 
         const headers = Object.assign({ "Z-Auth-Token": token }, this.#headers);
         const response: Response = await fetch(`${this.#baseUrl}/auth/status/`, {
             headers
         });
         const data: TokenStatus = await response.json()
-        .catch(() => this.#log("Could not parse JSON while getting token status ❌"));
+        .catch(() => this.#error("Could not parse JSON while getting token status ❌"));
 
         return data ?? {};
     }
@@ -497,7 +493,7 @@ class Rest {
     }
 
     async resetPassword(email: string): Promise<resetPassword | void> {
-        if (!this.authorized) return this.#log("Not authorized ❌");
+        if (!this.authorized) return this.#error("Not authorized ❌");
 
         const headers = Object.assign({ "Z-Auth-Token": this.#token }, {
             ...this.#headers,
@@ -513,7 +509,7 @@ class Rest {
         });
 
         const data: resetPassword = await res.json()
-        .catch(() => this.#log("Could not parse JSON while resetting password ❌"));
+        .catch(() => this.#error("Could not parse JSON while resetting password ❌"));
 
         return data ?? {};
     };
@@ -621,8 +617,8 @@ class Rest {
         json = true,
         id = "userId",
         customHeaders = {}
-    }: FetchOptions = {}): Promise<TResponse | void> {
-        if (!this.authorized) return this.#log("Not logged in ❌");
+    }: FetchOptions = {}): Promise<TResponse | Promise<never>> {
+        if (!this.authorized) return this.#error("Not logged in ❌");
 
         const headers: HeadersInit = Object.assign(this.#headers, { "Z-Auth-Token": this.#token, ...customHeaders });
         const options: RequestInit = {
@@ -640,12 +636,22 @@ class Rest {
 
         if (res.data?.error) {
             const { data } = res;
-            return this.#log(`An error happened: ${data.message ? data.message : data.error.split('/').pop()} (${data.statusCode}) ❌`);
+            return this.#error(`An error happened: ${data.message ? data.message : data.error.split('/').pop()} (${data.statusCode}) ❌`);
         }
 
-        if (res.status !== 200) return this.#log(`The server returned a status different from 200 (${res.status}) ❌`);
+        if (res.status !== 200) return this.#error(`The server returned a status different from 200 (${res.status}) ❌`);
 
         return res.data;
+    }
+
+    /**
+     * @private Rejects the promise and logs the error
+     * @param message error message
+     * @returns {Promise<never>} rejected promise
+     */
+    #error(message: string): Promise<never> {
+        this.#log(message);
+        return Promise.reject(message);
     }
 
     /**
