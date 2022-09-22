@@ -6,6 +6,7 @@ interface ClassOptions {
     state?: string;
     app?: string;
     debug?: boolean;
+    saveTempFile?: boolean;
 }
 interface User {
     name?: string;
