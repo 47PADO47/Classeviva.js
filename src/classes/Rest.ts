@@ -16,6 +16,7 @@ class Rest {
     public login_timeout: NodeJS.Timeout;
     public expiration: string;
     public debug: boolean;
+    public saveTempFile: boolean;
     
     public authorized: boolean;
     public user: User;
@@ -34,6 +35,7 @@ class Rest {
         this.login_timeout;
         this.expiration = "";
         this.debug = data.debug || false;
+        this.saveTempFile = data.saveTempFile ?? true;
 
         this.authorized = false;
         this.user = {
@@ -66,7 +68,7 @@ class Rest {
 
         if (!username || !password) return this.#error("Username or password not set ❌");
 
-        if (!await this.#checkTemp()) {
+        if (!await this.#checkTemp() || !this.saveTempFile) {
             const userData = {
                 uid: username,
                 pass: password,
@@ -88,7 +90,10 @@ class Rest {
             if (response.status !== 200) return this.#error(`The server returned a status code other than 200 (${response.status}) ❌`);
             
             this.#updateData(json);
-            await writeFileSync(`${this.#directory}/cvv.json`, JSON.stringify(json, null, 2));
+            if (this.saveTempFile) {
+                await writeFileSync(`${this.#directory}/cvv.json`, JSON.stringify(json, null, 2));
+                this.#log("Saved temp file ✅");
+            }
         }
 
         if (!this.authorized) return this.#error("Failed to login ❌");
