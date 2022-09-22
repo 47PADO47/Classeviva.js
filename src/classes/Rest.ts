@@ -15,15 +15,16 @@ class Rest {
 
     public login_timeout: NodeJS.Timeout;
     public expiration: string;
+    public debug: boolean;
     
     public authorized: boolean;
     public user: User;
 
     readonly #app : string;
     #headers: Headers;
-    constructor({ username, password, state = Enums.States.Italy, app = Enums.Apps.Students }: ClassOptions = {}) {
-        this.username = username || "";
-        this.#password = password || "";
+    constructor({ state = Enums.States.Italy, app = Enums.Apps.Students, ...data }: ClassOptions = {}) {
+        this.username = data.username || "";
+        this.#password = data.password || "";
         this.#token = "";
 
         this.#state = state;
@@ -32,6 +33,7 @@ class Rest {
 
         this.login_timeout;
         this.expiration = "";
+        this.debug = data.debug || false;
 
         this.authorized = false;
         this.user = {
@@ -660,7 +662,8 @@ class Rest {
      * @returns {void} log in the console
      */
     #log(...args: any[]): void {
-        return console.log(`\x1b[31m[CLASSEVIVA]\x1b[0m`, ...args);
+        if (!this.debug) return;
+        console.log(`\x1b[31m[CLASSEVIVA]\x1b[0m`, ...args);
     }
 }
 
