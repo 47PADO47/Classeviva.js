@@ -5,6 +5,7 @@ interface ClassOptions {
     password?: string;
     state?: string;
     app?: string;
+    debug?: boolean;
 }
 interface User {
     name?: string;
