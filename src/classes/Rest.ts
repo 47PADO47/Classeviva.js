@@ -509,7 +509,7 @@ class Rest {
             "X-Requested-With": "XMLHttpRequest"
         });
         
-        const res: Response = await fetch(`${this.#baseUrl.split('rest')[0]}sso/app/default/sam.php?a=akRSPWRQ`, {
+        const res: Response = await fetch(`${this.#getHost()}sso/app/default/sam.php?a=akRSPWRQ`, {
             method: "POST",
             body: `eml=${email}`,
             headers
@@ -520,6 +520,14 @@ class Rest {
 
         return data ?? {};
     };
+
+    /**
+     * @private Gets the host of the current url
+     * @returns {string} The host of the current url
+     */
+    #getHost(): string {
+        return this.#baseUrl.split('rest')[0];
+    }
 
     /**
      * @private Updates the user object with school infos and the user type
