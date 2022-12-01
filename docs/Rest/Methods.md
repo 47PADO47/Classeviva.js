@@ -71,3 +71,7 @@
 > readNote
 
 > getTerms
+
+> getAucContents
+
+> getAucContentAuths
