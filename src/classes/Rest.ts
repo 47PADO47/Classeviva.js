@@ -519,12 +519,12 @@ class Rest {
         .catch(() => this.#error("Could not parse JSON while resetting password ❌"));
 
         return data ?? {};
-    };
+    }
 
     async readNote(noteType: keyof AgendaNotes, noteId: string | number): Promise<readNote> {
         const data: { event: readNote } = await this.#fetch({ path: `/notes/${noteType}/read/${noteId}/`, method: "POST", type: "students", body: undefined });
         return data?.event;
-    };
+    }
 
     async getTerms() {   
         if (!this.authorized) return this.#error("Not authorized ❌");
