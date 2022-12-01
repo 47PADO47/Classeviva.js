@@ -521,9 +521,9 @@ class Rest {
         return data ?? {};
     };
 
-    async readNote(noteType: keyof AgendaNotes, noteId: string | number) {
-        const data: { event?: readNote } = await this.#fetch({ path: `/notes/${noteType}/read/${noteId}/`, method: "POST", type: "students", body: undefined });
-        return data?.event ?? {};
+    async readNote(noteType: keyof AgendaNotes, noteId: string | number): Promise<readNote> {
+        const data: { event: readNote } = await this.#fetch({ path: `/notes/${noteType}/read/${noteId}/`, method: "POST", type: "students", body: undefined });
+        return data?.event;
     };
 
     async getTerms() {   
