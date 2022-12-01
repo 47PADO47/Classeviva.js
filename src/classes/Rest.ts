@@ -1,7 +1,7 @@
 import fetch, { HeadersInit, RequestInit, Response } from 'node-fetch';
 import { parse, join } from 'path';
 import { readFileSync, writeFileSync } from 'fs';
-import { ClassOptions, User, Headers, FetchResponse, LoginResponse, AgendaFilter, TalkOptions, Overview, Card, ContentElement, TermsAgreementResponse, setTermsAgreementResponse, readOptions, TokenStatus, TicketResponse, checkDocument, absences, readNotice, Grade, calendarDay, FetchOptions, resetPassword, AgendaNotes, readNote } from '../typings/Rest';
+import { ClassOptions, User, Headers, FetchResponse, LoginResponse, AgendaFilter, TalkOptions, Overview, Card, ContentElement, TermsAgreementResponse, setTermsAgreementResponse, readOptions, TokenStatus, TicketResponse, checkDocument, absences, readNotice, Grade, calendarDay, FetchOptions, resetPassword, AgendaNotes, readNote, Term } from '../typings/Rest';
 import * as Enums from '../Enums';
 
 class Rest {
@@ -525,6 +525,27 @@ class Rest {
         const data: { event?: readNote } = await this.#fetch({ path: `/notes/${noteType}/read/${noteId}/`, method: "POST", type: "students", body: undefined });
         return data?.event ?? {};
     };
+
+    async getTerms() {   
+        if (!this.authorized) return this.#error("Not authorized ❌");
+
+        const headers = Object.assign({ "Z-Auth-Token": this.#token }, {
+            ...this.#headers,
+            "Content-Type": "application/x-www-form-urlencoded",
+            "Accept": "application/json",
+            "X-Requested-With": "XMLHttpRequest"
+        });
+        
+        const res: Response = await fetch(`${this.#getHost()}auc/api/v2/getTerms`, {
+            method: "GET",
+            headers
+        });
+
+        const data: Term[] = await res.json()
+        .catch(() => this.#error("Could not parse JSON while getting terms ❌"));
+
+        return data ?? {};
+    }
 
     /**
      * @private Gets the host of the current url
