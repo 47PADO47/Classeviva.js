@@ -154,7 +154,7 @@ interface Note {
     evtDate: string,
     authorName: string,
     readStatus: boolean,
-};
+}
 
 type NTWN = Note & {
     warningType: string,
