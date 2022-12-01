@@ -110,7 +110,7 @@ type AgendaEvent = {
 };
 
 type AgendaNotes = {
-    NTTE: NTTE[],
+    NTTE: Note[],
     NTCL: unknown[],
     NTWN: NTWN[],
     NTST: unknown[],
@@ -148,7 +148,7 @@ type Grade = {
 
 type colorType = "red" | "green" | "blue";
 
-type NTTE = {
+interface Note {
     evtId: number,
     evtText: string,
     evtDate: string,
@@ -156,12 +156,7 @@ type NTTE = {
     readStatus: boolean,
 };
 
-type NTWN = {
-    evtId: number,
-    evtText: string,
-    evtDate: string,
-    authorName: string,
-    readStatus: boolean,
+type NTWN = Note & {
     warningType: string,
 };
 
@@ -278,6 +273,12 @@ interface resetPassword {
     htm: string,
 }
 
+interface readNote {
+    evtCode: keyof AgendaNotes,
+    evtId: number,
+    evtText: string,
+}
+
 export {
     ClassOptions,
     User,
@@ -300,5 +301,7 @@ export {
     readNotice,
     Grade,
     calendarDay,
-    resetPassword
+    resetPassword,
+    AgendaNotes,
+    readNote,
 };
