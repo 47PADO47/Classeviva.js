@@ -647,7 +647,7 @@ class Rest {
         };
         if (body && method !== "GET") options.body = body;
 
-        const response: Response = await require('node-fetch')(`${this.#baseUrl}/${type}/${id == "userId" ? this.user.id : this.user.ident}${path}`, options);
+        const response: Response = await fetch(`${this.#baseUrl}/${type}/${id == "userId" ? this.user.id : this.user.ident}${path}`, options);
 
         const res: FetchResponse = {
             status: response.status,
