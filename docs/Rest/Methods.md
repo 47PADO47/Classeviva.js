@@ -67,3 +67,7 @@
 > readDocument
 
 > resetPassword
+
+> readNote
+
+> getTerms
