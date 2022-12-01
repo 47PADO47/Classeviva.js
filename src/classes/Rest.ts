@@ -1,7 +1,7 @@
 import fetch, { HeadersInit, RequestInit, Response } from 'node-fetch';
 import { parse, join } from 'path';
 import { readFileSync, writeFileSync } from 'fs';
-import { ClassOptions, User, Headers, FetchResponse, LoginResponse, AgendaFilter, TalkOptions, Overview, Card, ContentElement, TermsAgreementResponse, setTermsAgreementResponse, readOptions, TokenStatus, TicketResponse, checkDocument, absences, readNotice, Grade, calendarDay, FetchOptions, resetPassword } from '../typings/Rest';
+import { ClassOptions, User, Headers, FetchResponse, LoginResponse, AgendaFilter, TalkOptions, Overview, Card, ContentElement, TermsAgreementResponse, setTermsAgreementResponse, readOptions, TokenStatus, TicketResponse, checkDocument, absences, readNotice, Grade, calendarDay, FetchOptions, resetPassword, AgendaNotes, readNote } from '../typings/Rest';
 import * as Enums from '../Enums';
 
 class Rest {
@@ -519,6 +519,11 @@ class Rest {
         .catch(() => this.#error("Could not parse JSON while resetting password ❌"));
 
         return data ?? {};
+    };
+
+    async readNote(noteType: keyof AgendaNotes, noteId: string | number) {
+        const data: { event?: readNote } = await this.#fetch({ path: `/notes/${noteType}/read/${noteId}/`, method: "POST", type: "students", body: undefined });
+        return data?.event ?? {};
     };
 
     /**
