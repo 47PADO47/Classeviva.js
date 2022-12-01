@@ -565,6 +565,24 @@ class Rest {
         return res.text();
     }
 
+    async getAucContentAuths() {   
+        if (!this.authorized) return this.#error("Not authorized ❌");
+
+        const headers = Object.assign({ "Z-Auth-Token": this.#token }, {
+            ...this.#headers,
+            "Content-Type": "application/x-www-form-urlencoded",
+            "Accept": "application/json",
+            "X-Requested-With": "XMLHttpRequest"
+        });
+        
+        const res: Response = await fetch(`${this.#getHost()}auc/api/v2/contentAuths`, {
+            method: "GET",
+            headers
+        });
+        
+        return res.text();
+    }
+
     /**
      * @private Gets the host of the current url
      * @returns {string} The host of the current url
