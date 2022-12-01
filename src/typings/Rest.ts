@@ -279,6 +279,14 @@ interface readNote {
     evtText: string,
 }
 
+interface Term {
+    contents: string,
+    content_type_id: string,
+    has_accepted: boolean,
+    set_date: string,
+    version: string,
+}
+
 export {
     ClassOptions,
     User,
@@ -304,4 +312,5 @@ export {
     resetPassword,
     AgendaNotes,
     readNote,
+    Term,
 };
