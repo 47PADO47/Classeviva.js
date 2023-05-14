@@ -381,6 +381,21 @@ class Tibidabo {
     return data;
   }
 
+  /*async addMessageAttachment(messageId: string | number, attachment: Buffer) {
+    const data = await this.#fetch({
+      url: `messaggi.php`,
+      path: 'sps-api',
+      //form data
+      body: {
+        a: 'acAtchAdd',
+        msgid: messageId,
+        //attach[0]
+      },
+    });
+
+    return data;
+  }*/
+
   #objToURLParams(obj: any) {
     return new URLSearchParams(Object.entries(obj)).toString();
   };
