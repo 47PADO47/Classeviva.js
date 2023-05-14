@@ -125,7 +125,7 @@ class Tibidabo {
     if (!this.authorized) {
       this.#error("Already logged out");
       return;
-    };
+    }
 
     this.#token = "";
     this.authorized = false;
@@ -167,7 +167,7 @@ class Tibidabo {
     });
 
     return data?.data?.whoami || {};
-  };
+  }
 
   async getOASSettings() {
     const data = await this.#fetch({
@@ -182,7 +182,7 @@ class Tibidabo {
     if (data?.errori) return this.#error(data.errori.toString());
 
     return data;
-  };
+  }
 
   async getUserInfo(userId: number | string, accountType: userTypesKeys) {
     const data = await this.#fetch({
@@ -195,7 +195,7 @@ class Tibidabo {
     });
 
     return data?.userInfo || {};
-  };
+  }
 
   async getMsgTargets(withUsers: boolean = true): Promise<msgTargets> {
     const data: {targets: msgTargets} = await this.#fetch({
@@ -223,7 +223,7 @@ class Tibidabo {
     });
 
     return data?.data?.net;
-  };
+  }
 
   async getGroups(withLongDescription: boolean = true, withPhoto: boolean = true, withXmlInfo: boolean = true): Promise<group[]> {
     const data: {data:{groups: group[]}} = await this.#fetch({
@@ -241,7 +241,7 @@ class Tibidabo {
     });
 
     return data?.data?.groups;
-  };
+  }
   
   async getContactInfo(accountStringIdent: string): Promise<contactInfo> {
     const data: contactInfo = await this.#fetch({
@@ -253,7 +253,7 @@ class Tibidabo {
     });
 
     return data;
-  };
+  }
 
   async getMessages(page: number | '' = '', search: string = '', maxMsgs: number = 20) {
     const body = {
@@ -274,7 +274,7 @@ class Tibidabo {
     });
 
     return data;
-  };
+  }
 
   async setMessageAsRead(messageId: number | string) {
     const data = await this.#fetch({
@@ -286,7 +286,7 @@ class Tibidabo {
     });
 
     return data;
-  };
+  }
 
   async postComment(messageId: number | string, comment: string) {
     const data = await this.#fetch({
@@ -300,7 +300,7 @@ class Tibidabo {
     });
 
     return data;
-  };
+  }
 
   async likeMessage(messageId: number | string) {
     const data = await this.#fetch({
@@ -323,7 +323,7 @@ class Tibidabo {
     });
 
     return data?.unread?.totCount || 0;
-  };
+  }
 
   //sends message, but apparently they dont show up
   async sendMessage(message: string, subject: string, targetID: number | string) {
@@ -395,22 +395,22 @@ class Tibidabo {
 
   #objToURLParams(obj: any) {
     return new URLSearchParams(Object.entries(obj)).toString();
-  };
+  }
 
   public isEmail(email: string): boolean {
     const re = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
     return re.test(email.toLowerCase());
-  };
+  }
 
   #getCookie(response: Response): string {
     const cookies = response.headers.get("Set-Cookie");
     const cookie = cookies?.split(", ").pop();
     return cookie ?? "";
-  };
+  }
   
   booleanToInt(bool: boolean): number {
     return bool ? 1 : 0;
-  };
+  }
 
   getMethods(): string[] {
     return Object.getOwnPropertyNames(Object.getPrototypeOf(this)).filter(prop => prop !== "constructor");
