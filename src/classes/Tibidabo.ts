@@ -355,6 +355,19 @@ class Tibidabo {
     return data;
   }*/
 
+  async removeMeFromThread(threadMsgId: string | number) {
+    const data = await this.#fetch({
+      url: `messaggi.php`,
+      path: 'sps-api',
+      body: {
+        a: 'acRemoveMeFromThread',
+        id: threadMsgId,
+      },
+    });
+
+    return data;
+  }
+
   #objToURLParams(obj: any) {
     return new URLSearchParams(Object.entries(obj)).toString();
   };
