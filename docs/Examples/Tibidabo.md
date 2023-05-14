@@ -4,7 +4,7 @@
     const { Tibidabo } = require('classeviva.js');
 
     const classeviva = new Tibidabo({
-        //Support for username might come in the future, for now it's not implemented for developer ease
+        //Username support might come in the future, as of now it's not implemented for developer ease
         email: 'EMAIL',
         password: 'PASSWORD',
     });
