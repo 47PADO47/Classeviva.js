@@ -8,6 +8,11 @@ Here you can find infos about the classes contained in this package. Choose a do
    - [Methods](Rest/Methods.md)
    - [Properties](Rest/Properties.md)
 
+• Tibidabo
+
+   - [Methods](Tibidabo/Methods.md)
+   - [Properties](Tibidabo/Properties.md)
+
 • Web
 
    - [Methods](Web/Methods.md)
