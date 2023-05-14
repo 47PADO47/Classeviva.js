@@ -4,7 +4,6 @@ import { userTypesKeys } from "../Enums";
 interface ClassOptions {
     email?: string;
     password?: string;
-    schoolCode?: string;
 }
 
 type User = {
