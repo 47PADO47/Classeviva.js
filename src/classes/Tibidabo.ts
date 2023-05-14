@@ -368,6 +368,19 @@ class Tibidabo {
     return data;
   }
 
+  async reportMessage(messageId: string | number) {
+    const data = await this.#fetch({
+      url: `messaggi.php`,
+      path: 'sps-api',
+      body: {
+        a: 'acBanMsgReq',
+        id: messageId,
+      },
+    });
+
+    return data;
+  }
+
   #objToURLParams(obj: any) {
     return new URLSearchParams(Object.entries(obj)).toString();
   };
