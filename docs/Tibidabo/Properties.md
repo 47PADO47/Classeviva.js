@@ -2,8 +2,6 @@
 
 > email
 
-> schoolCode
-
 > authorized
 
 > user

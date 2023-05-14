@@ -16,6 +16,8 @@ A lightweight Node.js module for Classeviva / Spaggiari electronic register 📚
 
 • [Rest](docs/Examples/Rest.md)
 
+• [Tibidabo](docs/Examples/Tibidabo.md)
+
 • [Web](docs/Examples/Web.md)
 
 ## Docs
