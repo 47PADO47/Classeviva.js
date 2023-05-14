@@ -14,7 +14,6 @@ import {
 
 class Tibidabo {
   public readonly email: string;
-  public readonly schoolCode: string;
   readonly #password: string;
   #token: string;
 
@@ -24,10 +23,9 @@ class Tibidabo {
   
   readonly #baseUrl: (path?: string) => string;
   #headers: HeadersInit;
-  constructor({ email, password, schoolCode }: ClassOptions = {}) {
+  constructor({ email, password }: ClassOptions = {}) {
   
     this.email = email || "";
-    this.schoolCode = schoolCode || "";
     this.#password = password || "";
     this.#token = "";
     
@@ -70,7 +68,6 @@ class Tibidabo {
 
   async login(data: ClassOptions = {
     email: this.email,
-    schoolCode: this.schoolCode,
     password: this.#password,
   }): Promise<boolean> {
     if (!this.isEmail(data.email ?? '')) return this.#error("Invalid email");
