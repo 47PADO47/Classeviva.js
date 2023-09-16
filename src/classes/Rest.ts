@@ -583,6 +583,14 @@ class Rest {
         return res.text();
     }
 
+    async getSchoolPresentation(schoolCode: string) {
+        const res: Response = await fetch(`${this.#getHost()}gek/getSchoolPresentation/${schoolCode}`, {
+            method: "GET",
+        });
+        
+        return res.text();
+    }
+
     /**
      * @private Gets the host of the current url
      * @returns {string} The host of the current url
