@@ -1,23 +1,13 @@
-export interface IStates {
-    Italy: string;
-    SanMarino: string;
-    Argentina: string;
-};
+import { ObjectValues } from "./typings/Enums";
 
-export const States: Readonly<IStates> = Object.freeze({
+const States = {
     Italy: "IT",
     SanMarino: "SM",
     Argentina: "AR",
-});
+} as const;
+type State = ObjectValues<typeof States>;
 
-export interface IApps {
-    Students: string;
-    Family: string;
-    Aant: string;
-    Teachers: string;
-};
-
-export const Apps: Readonly<IApps> = Object.freeze({
+const Apps = {
     Students: "CVVS/studente/4.1.8",
     Family: "CVVS/famiglia/4.1.8",
     Aant: "CVVS/aant/2.1.2",
@@ -25,33 +15,34 @@ export const Apps: Readonly<IApps> = Object.freeze({
     Inalpi: "classevivaInalpi/3.1.7",
     Tibidabo: "Il Social/1.205",
     CatalogoSpaggiari: "CatalogoSpaggiari iPad User Agent ;)"
-});
+} as const;
+type App = ObjectValues<typeof Apps>;
 
-export interface IUrls {
-    [key: string]: string;
-};
-
-export const Urls: Readonly<IUrls> = Object.freeze({
+const StateUrls = {
     IT: "web.spaggiari.eu",
     SM: "web.spaggiari.sm",
     AR: "ar.spaggiari.eu",
-});
+} as const;
 
-export type userTypesKeys = 'S' | 'G' | 'A' | 'X';
-
-export type IUsers = {
-    [key: string]: string;
-};
-
-export const UserTypes: Readonly<IUsers> = {
+const UserTypes = {
     S: "studente",
     G: "genitore",
     A: "insegnante",
-};
+    X: "unknonw"
+} as const;
+type userTypesKeys = keyof typeof UserTypes;
+type userType = ObjectValues<typeof UserTypes>;
 
-export default {
+export {
     States,
     Apps,
-    Urls,
+    StateUrls,
     UserTypes,
 };
+
+export type {
+    State,
+    App,
+    userTypesKeys,
+    userType,
+}
