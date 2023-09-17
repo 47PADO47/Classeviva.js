@@ -1,7 +1,7 @@
 import fetch, { HeadersInit, RequestInit, Response } from 'node-fetch';
 import { parse, join } from 'path';
 import { readFileSync, writeFileSync } from 'fs';
-import { ClassOptions, User, Headers, LoginResponse, AgendaFilter, TalkOptions, Overview, Card, ContentElement, TermsAgreementResponse, setTermsAgreementResponse, readOptions, TokenStatus, TicketResponse, checkDocument, absences, readNotice, Grade, calendarDay, FetchOptions, resetPassword, AgendaNotes, readNote, Term, RestFetchOptions, MinigameToken, Homeworks } from '../typings/Rest';
+import { ClassOptions, User, Headers, LoginResponse, AgendaFilter, TalkOptions, Overview, Card, ContentElement, TermsAgreementResponse, setTermsAgreementResponse, readOptions, TokenStatus, TicketResponse, checkDocument, absences, readNotice, Grade, calendarDay, FetchOptions, resetPassword, AgendaNotes, readNote, Term, RestFetchOptions, MinigameToken, Homeworks, MinigameScope, MinigameLeaderboard } from '../typings/Rest';
 import * as Enums from '../Enums';
 
 class Rest {
@@ -539,6 +539,12 @@ class Rest {
         })
     }
 
+    async getMinigameLeaderboard(scope: MinigameScope, gameId: number) {
+        return await this.#fetchMinigame<MinigameLeaderboard>({
+            url: `${this.#getApiUrl()}/minigame/leaderboards/${scope}/${gameId}/${this.user.ident}`,
+        });
+    }
+
     #getApiUrl() {
         return `${this.#getHost()}rest/v1`;
     }
@@ -737,9 +743,9 @@ class Rest {
         });
     }
 
-    async #fetchMinigame(opts: FetchOptions) {
+    async #fetchMinigame<T>(opts: FetchOptions) {
         const { minigameToken } = await this.getMinigameToken();
-        return this.#fetch({
+        return this.#fetch<T>({
             ...opts,
             customHeaders: {
                 'Authorization': `Bearer ${minigameToken}`,
