@@ -297,6 +297,10 @@ interface MinigameToken {
     for: string
 }
 
+interface Homeworks {
+    items: any[]
+}
+
 export {
     ClassOptions,
     User,
@@ -324,4 +328,5 @@ export {
     Term,
     RestFetchOptions,
     MinigameToken,
+    Homeworks,
 };
