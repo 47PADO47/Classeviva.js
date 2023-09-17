@@ -599,6 +599,10 @@ class Rest {
         this.#log('set state to', newState);
     };
 
+    async getHomeworks() {
+        return this.#fetch<{ items: any[] }>({ path: '/homeworks' })
+    }
+
     #getApiUrl() {
         return `${this.#getHost()}rest/v1`;
     }
