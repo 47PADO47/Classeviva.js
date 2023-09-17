@@ -9,7 +9,7 @@ class Rest {
     readonly #password: string;
     #token: string;
 
-    readonly #state: string;
+    readonly #state: Enums.State;
     readonly #baseUrl: string;
     readonly #directory: string;
 
@@ -21,7 +21,7 @@ class Rest {
     public authorized: boolean;
     public user: User;
 
-    readonly #app : string;
+    readonly #app : Enums.App;
     #headers: Headers;
     constructor({ state = Enums.States.Italy, app = Enums.Apps.Students, ...data }: ClassOptions = {}) {
         this.username = data.username || "";
@@ -29,7 +29,7 @@ class Rest {
         this.#token = "";
 
         this.#state = state;
-        this.#baseUrl = `https://${Enums.Urls[this.#state]}/rest/v1`;
+        this.#baseUrl = `https://${Enums.StateUrls[this.#state]}/rest/v1`;
         this.#directory = join(parse(__dirname).dir, '..');
 
         this.login_timeout;
@@ -404,7 +404,7 @@ class Rest {
         if (!this.user.school?.code) return this.#error("No school code, please update using getCard() or getCards() ❌");
 
         const headers = Object.assign({ "Z-Auth-Token": this.#token }, this.#headers);
-        const response: Response = await fetch(`https://${Enums.Urls[this.#state]}/gek/api/v1/${this.user.school.code}/2021/students/contents?common=${common}`, {
+        const response: Response = await fetch(`${this.#getHost()}/gek/api/v1/${this.user.school.code}/2021/students/contents?common=${common}`, {
             headers
         });
 
