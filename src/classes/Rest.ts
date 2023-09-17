@@ -1,7 +1,7 @@
 import fetch, { HeadersInit, RequestInit, Response } from 'node-fetch';
 import { parse, join } from 'path';
 import { readFileSync, writeFileSync } from 'fs';
-import { ClassOptions, User, Headers, FetchResponse, LoginResponse, AgendaFilter, TalkOptions, Overview, Card, ContentElement, TermsAgreementResponse, setTermsAgreementResponse, readOptions, TokenStatus, TicketResponse, checkDocument, absences, readNotice, Grade, calendarDay, FetchOptions, resetPassword, AgendaNotes, readNote, Term } from '../typings/Rest';
+import { ClassOptions, User, Headers, LoginResponse, AgendaFilter, TalkOptions, Overview, Card, ContentElement, TermsAgreementResponse, setTermsAgreementResponse, readOptions, TokenStatus, TicketResponse, checkDocument, absences, readNotice, Grade, calendarDay, FetchOptions, resetPassword, AgendaNotes, readNote, Term, RestFetchOptions } from '../typings/Rest';
 import * as Enums from '../Enums';
 
 class Rest {
@@ -127,7 +127,7 @@ class Rest {
      * @returns {object[]} Array of objects containing the student's cards
      */
     async getCards(): Promise<Card[]> {
-        const data: { cards?: Card[] } | void = await this.#fetch({ path: "/cards" });
+        const data: { cards?: Card[] } | void = await this.#fetchRest({ path: "/cards" });
         if (data?.cards && data?.cards?.length > 0) this.#updateUser(data.cards[0]);
         
         return data?.cards ?? [];
@@ -138,7 +138,7 @@ class Rest {
      * @returns {object} Object containing the student's card
      */
     async getCard(): Promise<Card | undefined> {
-        const data: { card?: Card } | void = await this.#fetch({ path: "/card" });
+        const data: { card?: Card } | void = await this.#fetchRest({ path: "/card" });
         if (data?.card && Object.keys(data?.card ?? {}).length > 0) this.#updateUser(data.card);
 
         return data?.card;
@@ -149,7 +149,7 @@ class Rest {
      * @returns {object[]} Array of objects containing the student's grades
      */
     async getGrades(): Promise<Grade[]> {
-        const data: {grades: Grade[]} | void = await this.#fetch({ path: `/grades2` });
+        const data: {grades: Grade[]} | void = await this.#fetchRest({ path: `/grades2` });
         return data?.grades ?? [];
     }
 
@@ -158,7 +158,7 @@ class Rest {
      * @returns {object[]} Array of objects containing the student's absences
      */
     async getAbsences(): Promise<absences[]> {
-        const data: {events: absences[]} | void = await this.#fetch({ path: `/absences/details` });
+        const data: {events: absences[]} | void = await this.#fetchRest({ path: `/absences/details` });
         return data?.events ?? [];
     }
 
@@ -178,7 +178,7 @@ class Rest {
             other: "AGNT",
         };
 
-        const data: any = await this.#fetch({ path: `/agenda/${map[filter]}/${this.#formatDate(start)}/${this.#formatDate(end)}` });
+        const data: any = await this.#fetchRest({ path: `/agenda/${map[filter]}/${this.#formatDate(start)}/${this.#formatDate(end)}` });
         return data?.agenda ?? [];
     }
 
@@ -187,7 +187,7 @@ class Rest {
      * @returns {object[]} Array of objects containing the student's documents
      */
     async getDocuments(): Promise<any> {
-        const data: any = await this.#fetch({ path: "/documents", method: "POST" });
+        const data: any = await this.#fetchRest({ path: "/documents", method: "POST" });
         return data ?? [];
     }
 
@@ -196,7 +196,7 @@ class Rest {
      * @returns {object[]} Array of objects containing the student's noticeboard items
      */
     async getNoticeboard(): Promise<any> {
-        const data: any = await this.#fetch({ path: "/noticeboard" });
+        const data: any = await this.#fetchRest({ path: "/noticeboard" });
         return data?.items ?? [];
     }
 
@@ -205,7 +205,7 @@ class Rest {
      * @returns {object[]} Array of objects containing the student's books
      */
     async getSchoolBooks(): Promise<any> {
-        const data: any = await this.#fetch({ path: "/schoolbooks" });
+        const data: any = await this.#fetchRest({ path: "/schoolbooks" });
         return data?.schoolbooks ?? [];
     }
 
@@ -214,7 +214,7 @@ class Rest {
      * @returns {object[]} Array of objects containing the student's calendar
      */
     async getCalendar(): Promise<calendarDay[]> {
-        const data: {calendar: calendarDay[]} | void = await this.#fetch({ path: "/calendar/all" });
+        const data: {calendar: calendarDay[]} | void = await this.#fetchRest({ path: "/calendar/all" });
         return data?.calendar ?? [];
     }
 
@@ -226,7 +226,7 @@ class Rest {
      * @returns {object[]} Array of objects containing the student's lessons
      */
     async getLessons(today: boolean = true, start: Date = new Date(), end: Date = new Date()): Promise<any> {
-        const data: any = await this.#fetch({ path: `/lessons${today ? "/today" : `/${this.#formatDate(start)}/${this.#formatDate(end)}`}` });
+        const data: any = await this.#fetchRest({ path: `/lessons${today ? "/today" : `/${this.#formatDate(start)}/${this.#formatDate(end)}`}` });
         return data?.lessons ?? [];
     }
 
@@ -235,7 +235,7 @@ class Rest {
      * @returns {object[]} Array of objects containing the student's notes
      */
     async getNotes(): Promise<any> {
-        const data: any = await this.#fetch({ path: "/notes/all" });
+        const data: any = await this.#fetchRest({ path: "/notes/all" });
         return data ?? [];
     }
 
@@ -244,7 +244,7 @@ class Rest {
      * @returns {object[]} Array of objects containing the student's periods
      */
     async getPeriods(): Promise<any> {
-        const data: any = await this.#fetch({ path: "/periods" });
+        const data: any = await this.#fetchRest({ path: "/periods" });
         return data?.periods ?? [];
     }
 
@@ -253,7 +253,7 @@ class Rest {
      * @returns {object[]} Array of objects containing the student's subjects
      */
     async getSubjects(): Promise<any> {
-        const data: any = await this.#fetch({ path: "/subjects" });
+        const data: any = await this.#fetchRest({ path: "/subjects" });
         return data?.subjects ?? [];
     }
 
@@ -262,7 +262,7 @@ class Rest {
      * @returns {object[]} Array of objects containing the student's didactics items
      */
     async getDidactics(): Promise<any> {
-        const data: any = await this.#fetch({ path: "/didactics" });
+        const data: any = await this.#fetchRest({ path: "/didactics" });
         return data?.didacticts ?? [];
     }
 
@@ -279,7 +279,7 @@ class Rest {
      * @returns {object} An object containing all the possible parents options for classeviva
      */
     async getParentsOptions(): Promise<any> {
-        const data: any = await this.#fetch({ path: "/_options", method: "GET", type: "parents" });
+        const data: any = await this.#fetchRest({ path: "/_options", method: "GET", type: "parents" });
         return data?.options ?? {};
     }
 
@@ -288,7 +288,7 @@ class Rest {
      * @returns {object[]} An array of objects containing data about the avaible talks with teachers for classeviva
      */
     async getOverallTalks(): Promise<any> {
-        const data: any = await this.#fetch({ path: "/overalltalks/list", method: "GET", type: "parents" });
+        const data: any = await this.#fetchRest({ path: "/overalltalks/list", method: "GET", type: "parents" });
         return data?.overallTalks ?? [];
     }
     
@@ -299,7 +299,7 @@ class Rest {
      * @returns {object[]} An array of objects containing data about the talks with teachers for classeviva
      */
     async getTalks(start: Date = new Date(), end: Date = new Date()): Promise<any> {
-        const data: any = await this.#fetch({ path: `/talks/teachersframes/${this.#formatDate(start)}/${this.#formatDate(end)}`, method: "GET", type: "parents" });
+        const data: any = await this.#fetchRest({ path: `/talks/teachersframes/${this.#formatDate(start)}/${this.#formatDate(end)}`, method: "GET", type: "parents" });
         return data?.teachers ?? [];
     }
 
@@ -307,36 +307,20 @@ class Rest {
      *  Get auth ticket
      * @returns {object} An object containing data about the auth ticket
      */
-    async getTicket(): Promise<TicketResponse | void> {
-        if (!this.authorized) return this.#error("Not authorized ❌");
-
-        const headers = Object.assign({ "Z-Auth-Token": this.#token }, this.#headers);
-        const res: Response = await fetch(`${this.#getApiUrl()}/auth/ticket`, {
-            headers
+    async getTicket(): Promise<TicketResponse> {
+        return this.#fetch<TicketResponse>({
+            url: `${this.#getApiUrl()}/auth/ticket`
         });
-
-        const data: TicketResponse = await res.json()
-        .catch(() => this.#error("Could not parse JSON while getting ticket ❌"));
-
-        return data ?? {};
     }
 
     /**
      *  Get the user avatar
      * @returns {unknown} The user avatar (not tested)
      */
-    async getAvatar(): Promise<any> {
-        if (!this.authorized) return this.#error("Not authorized ❌");
-
-        const headers = Object.assign({ "Z-Auth-Token": this.#token }, this.#headers);
-        const res: Response = await fetch(`${this.#getApiUrl()}/auth/avatar`, {
-            headers
+    async getAvatar() {
+        return this.#fetch({
+            url: `${this.#getApiUrl()}/auth/avatar`
         });
-
-        const data: any = await res.json()
-        .catch(() => this.#error("Could not parse JSON while getting avatar ❌"));
-
-        return data ?? {};
     }
 
     /**
@@ -346,7 +330,7 @@ class Rest {
      * @returns {object} An object containing data about the overview of a day or the time specified
      */
     async getOverview(start: Date = new Date(), end: Date = new Date()): Promise<Overview | undefined> {
-        const data: Overview | void = await this.#fetch({ path: `/overview/all/${this.#formatDate(start)}/${this.#formatDate(end)}` });
+        const data: Overview | void = await this.#fetchRest({ path: `/overview/all/${this.#formatDate(start)}/${this.#formatDate(end)}` });
         if (typeof data === "undefined") return undefined;
         return data;
     }
@@ -358,7 +342,7 @@ class Rest {
      * @returns {unknown}
      */
     /*async sendTeacherMessage(bookingId: string, message: string) {
-        const data: any = await this.#fetch(`/talks/teachermessage/${bookingId}`, "POST", "parents");
+        const data: any = await this.#fetchRest(`/talks/teachermessage/${bookingId}`, "POST", "parents");
         return data ?? {};
     }; */
 
@@ -369,7 +353,7 @@ class Rest {
      * @returns {object}
      */
     async readTalkMessage(bookingId: string) {
-        const data: any = await this.#fetch({ path: `/talks/teachermessage/${bookingId}`, method: "POST", type: "parents", body: JSON.stringify({ "messageRead": true }) });
+        const data: any = await this.#fetchRest({ path: `/talks/teachermessage/${bookingId}`, method: "POST", type: "parents", body: JSON.stringify({ "messageRead": true }) });
         return data ?? {};
     }
 
@@ -379,7 +363,7 @@ class Rest {
      * @returns {object} An object containing data about the document
      */
     async checkDocument(hash: string | number): Promise<{ avaible: boolean }> {
-        const data: checkDocument | void = await this.#fetch({ path: `/documents/check/${hash}/`, method: "POST" });
+        const data: checkDocument | void = await this.#fetchRest({ path: `/documents/check/${hash}/`, method: "POST" });
         return data?.document ?? { avaible: false };
     }
 
@@ -392,7 +376,7 @@ class Rest {
      * @returns {object} An object containing data about the booked talk
      */
     async bookTalk(teacherId: string | number, talkId: string | number, slot: string | number, opts: TalkOptions): Promise<any> {
-        const data: any = await this.#fetch({ path: `/talks/book/${teacherId}/${talkId}/${slot}`, method: "POST", type: "parents", body: JSON.stringify(opts) });
+        const data: any = await this.#fetchRest({ path: `/talks/book/${teacherId}/${talkId}/${slot}`, method: "POST", type: "parents", body: JSON.stringify(opts) });
         return data ?? {};
     }
 
@@ -403,18 +387,11 @@ class Rest {
      * @returns {object[]} An array of objects containing data about the contents that's displayed in the app
      */
     async getContents(year: string | number = new Date().getFullYear(), common = true): Promise<ContentElement[] | void> {
-        if (!this.authorized) return this.#error("Not authorized ❌");
         if (!this.user.school?.code) return this.#error("No school code, please update using getCard() or getCards() ❌");
-
-        const headers = Object.assign({ "Z-Auth-Token": this.#token }, this.#headers);
-        const response: Response = await fetch(`${this.#getHost()}/gek/api/v1/${this.user.school.code}/${year}/students/contents?common=${common}`, {
-            headers
+        
+        return this.#fetch<ContentElement[]>({
+            url: `${this.#getHost()}/gek/api/v1/${this.user.school.code}/${year}/students/contents?common=${common}`
         });
-
-        const data: ContentElement[] = await response.json()
-        .catch(() => this.#error("Could not parse JSON while getting content ❌"));
-
-        return data ?? [];
     }
 
     /**
@@ -422,7 +399,7 @@ class Rest {
      * @returns {object} An object containing data about the agreement to the terms of classeviva
      */
     async getTermsAgreement(): Promise<TermsAgreementResponse | undefined> {
-        const data: TermsAgreementResponse | void = await this.#fetch({ path: "/getTermsAgreement", method: "GET", type: "users", body: undefined, json: true, id: "userIdent" });
+        const data: TermsAgreementResponse | void = await this.#fetchRest({ path: "/getTermsAgreement", type: "users", id: "userIdent" });
         if (typeof data === "undefined") return undefined;
         return data;
     }
@@ -434,7 +411,7 @@ class Rest {
      */
     async setTermsAgreement(ThirdParty: boolean = false): Promise<setTermsAgreementResponse> {
         const accepted = ThirdParty ? "1" : "0";
-        const data: setTermsAgreementResponse | void = await this.#fetch({ path: "/setTermsAgreement", method: "POST", type: "users", body: JSON.stringify({ bitmask: accepted }), json: true, id: "userIdent" });
+        const data: setTermsAgreementResponse | void = await this.#fetchRest({ path: "/setTermsAgreement", method: "POST", type: "users", body: JSON.stringify({ bitmask: accepted }), id: "userIdent" });
         return data ?? { msg: "NOT OK" };
     }
 
@@ -446,8 +423,8 @@ class Rest {
      * @returns {object} An object containing data about the notice
      */
     async readNotice(eventCode: string, id: string | number, options: readOptions = {}): Promise<readNotice | undefined> {
-        const data: readNotice | void = await this.#fetch({
-                path: `/noticeboard/read/${eventCode}/${id}/101`, method: "POST", type: "students", body: options ? JSON.stringify(options) : "", json: true, id: "userId", customHeaders: {
+        const data: readNotice | void = await this.#fetchRest({
+                path: `/noticeboard/read/${eventCode}/${id}/101`, method: "POST", body: options ? JSON.stringify(options) : "", customHeaders: {
                     "Content-Type": "application/x-www-form-urlencoded"
                 }
             });
@@ -480,16 +457,9 @@ class Rest {
      * @returns {object} An object containing data about the token
      */
     async getTokenStatus(token = this.#token): Promise<TokenStatus | void> {
-        if (!this.authorized || !token) return this.#error("Not authorized ❌");
-
-        const headers = Object.assign({ "Z-Auth-Token": token }, this.#headers);
-        const response: Response = await fetch(`${this.#getApiUrl()}/auth/status/`, {
-            headers
+        return this.#fetch<TokenStatus>({
+            url: `${this.#getApiUrl()}/auth/status`
         });
-        const data: TokenStatus = await response.json()
-        .catch(() => this.#error("Could not parse JSON while getting token status ❌"));
-
-        return data ?? {};
     }
 
     /**
@@ -498,100 +468,51 @@ class Rest {
      * @returns {Buffer} The document
      */
     async readDocument(hash: string): Promise<Buffer> {
-        const data: Buffer | void = await this.#fetch({ path: `/documents/read/${hash}/`, method: "POST", type: "students", body: undefined, json: false });
+        const data: Buffer | void = await this.#fetchRest({ path: `/documents/read/${hash}/`, method: "POST", responseType: "buffer" });
         return data ?? Buffer.from("");
     }
 
     async resetPassword(email: string): Promise<resetPassword | void> {
-        if (!this.authorized) return this.#error("Not authorized ❌");
-
-        const headers = Object.assign({ "Z-Auth-Token": this.#token }, {
-            ...this.#headers,
-            "Content-Type": "application/x-www-form-urlencoded",
-            "Accept": "application/json",
-            "X-Requested-With": "XMLHttpRequest"
-        });
-        
-        const res: Response = await fetch(`${this.#getHost()}sso/app/default/sam.php?a=akRSPWRQ`, {
-            method: "POST",
+        return this.#fetch<resetPassword>({
+            url: `${this.#getHost()}sso/app/default/sam.php?a=akRSPWRQ`,
             body: `eml=${email}`,
-            headers
+            customHeaders: {
+                "Content-Type": "application/x-www-form-urlencoded",
+                "X-Requested-With": "XMLHttpRequest"
+            }
         });
-
-        const data: resetPassword = await res.json()
-        .catch(() => this.#error("Could not parse JSON while resetting password ❌"));
-
-        return data ?? {};
     }
 
     async readNote(noteType: keyof AgendaNotes, noteId: string | number): Promise<readNote> {
-        const data: { event: readNote } = await this.#fetch({ path: `/notes/${noteType}/read/${noteId}/`, method: "POST", type: "students", body: undefined });
+        const data: { event: readNote } = await this.#fetchRest({ path: `/notes/${noteType}/read/${noteId}/`, method: "POST", type: "students", body: undefined });
         return data?.event;
     }
 
-    async getTerms() {   
-        if (!this.authorized) return this.#error("Not authorized ❌");
-
-        const headers = Object.assign({ "Z-Auth-Token": this.#token }, {
-            ...this.#headers,
-            "Content-Type": "application/x-www-form-urlencoded",
-            "Accept": "application/json",
-            "X-Requested-With": "XMLHttpRequest"
+    async getTerms(): Promise<Term[] | void> {
+        return this.#fetch<Term[]>({
+            url: `${this.#getHost()}auc/api/v2/getTerms`,
         });
-        
-        const res: Response = await fetch(`${this.#getHost()}auc/api/v2/getTerms`, {
-            method: "GET",
-            headers
-        });
-
-        const data: Term[] = await res.json()
-        .catch(() => this.#error("Could not parse JSON while getting terms ❌"));
-
-        return data ?? {};
     }
 
-    async getAucContents() {   
-        if (!this.authorized) return this.#error("Not authorized ❌");
-
-        const headers = Object.assign({ "Z-Auth-Token": this.#token }, {
-            ...this.#headers,
-            "Content-Type": "application/x-www-form-urlencoded",
-            "Accept": "application/json",
-            "X-Requested-With": "XMLHttpRequest"
+    async getAucContents() {
+        return this.#fetch({
+            url: `${this.#getHost()}auc/api/v2/contents`,
+            responseType: "text",
         });
-        
-        const res: Response = await fetch(`${this.#getHost()}auc/api/v2/contents`, {
-            method: "GET",
-            headers
-        });
-        
-        return res.text();
     }
 
-    async getAucContentAuths() {   
-        if (!this.authorized) return this.#error("Not authorized ❌");
-
-        const headers = Object.assign({ "Z-Auth-Token": this.#token }, {
-            ...this.#headers,
-            "Content-Type": "application/x-www-form-urlencoded",
-            "Accept": "application/json",
-            "X-Requested-With": "XMLHttpRequest"
+    async getAucContentAuths() {
+        return this.#fetch({
+            url: `${this.#getHost()}auc/api/v2/contentAuths`,
+            responseType: "text",
         });
-        
-        const res: Response = await fetch(`${this.#getHost()}auc/api/v2/contentAuths`, {
-            method: "GET",
-            headers
-        });
-        
-        return res.text();
     }
 
     async getSchoolPresentation(schoolCode: string) {
-        const res: Response = await fetch(`${this.#getHost()}gek/getSchoolPresentation/${schoolCode}`, {
-            method: "GET",
+        return this.#fetch({
+            url: `${this.#getHost()}gek/getSchoolPresentation/${schoolCode}`,
+            responseType: "text",
         });
-        
-        return res.text();
     }
 
     setState(newState: Enums.State) {
@@ -600,7 +521,7 @@ class Rest {
     };
 
     async getHomeworks() {
-        return this.#fetch<{ items: any[] }>({ path: '/homeworks' })
+        return this.#fetchRest<{ items: any[] }>({ path: '/homeworks' })
     }
 
     #getApiUrl() {
@@ -700,57 +621,6 @@ class Rest {
     }
 
     /**
-     * @private Fetch data from the server and the specified endpoint, then returns it
-     * @param {string} path api path
-     * @param {string} [method] http method
-     * @param {string} [type] students | parents
-     * @param {string} [body] body to send
-     * @param {boolean} [json] if the data should be parsed to json
-     * @param {string} [id] user identifier
-     * @param {object} [customHeaders] additional headers to send
-     * @returns {Promise<any>} the response
-     */
-    async #fetch<TResponse>({
-        path = "/",
-        method = "GET",
-        type = "students",
-        body = "",
-        json = true,
-        id = "userId",
-        customHeaders = {}
-    }: FetchOptions = {}): Promise<TResponse | Promise<never>> {
-        if (!this.authorized) return this.#error("Not logged in ❌");
-
-        const headers: HeadersInit = Object.assign(this.#headers, { "Z-Auth-Token": this.#token, ...customHeaders });
-        const url = `${this.#getApiUrl()}/${type}/${id == "userId" ? this.user.id : this.user.ident}${path}`
-
-        const options: RequestInit = {
-            method: method.toUpperCase(),
-            headers,
-        };
-        if (body && method !== "GET") options.body = body;
-
-        this.#log(method, url, JSON.stringify(options.body || {}));
-        const response: Response = await fetch(url, options);
-
-        const res: FetchResponse = {
-            status: response.status,
-            data: json ? await response.json() : await response.buffer()
-        };
-
-        this.#log(path, response.status, response.statusText);
-
-        if (res.data?.error) {
-            const { data } = res;
-            return this.#error(`An error happened: ${data.message ? data.message : data.error.split('/').pop()} (${data.statusCode}) ❌`);
-        }
-
-        if (res.status !== 200) return this.#error(`The server returned a status different from 200 (${res.status}) ❌`);
-
-        return res.data;
-    }
-
-    /**
      * @private Rejects the promise and logs the error
      * @param message error message
      * @returns {Promise<never>} rejected promise
@@ -768,6 +638,88 @@ class Rest {
     #log(...args: any[]): void {
         if (!this.debug) return;
         console.log(`\x1b[31m[CLASSEVIVA]\x1b[0m`, ...args);
+    }
+
+
+    async #fetch<T>({
+        url,
+        method = "GET",
+        body,
+        responseType = "json",
+        customHeaders = {}
+    }: FetchOptions): Promise<T | Promise<never>> {
+        if (!this.authorized) return this.#error("Not logged in ❌");
+
+        const headers: HeadersInit = {
+            ...this.#headers,
+            "Z-Auth-Token": this.#token,
+            ...customHeaders
+        };
+
+        const options: RequestInit = {
+            method: method.toUpperCase(),
+            headers,
+            body: method.toUpperCase() !== 'GET' ? body : undefined
+        };
+
+        this.#log(method, url, JSON.stringify(options.body || {}));
+
+        const response = await fetch(url, options);
+        var data: string | Buffer | Record<string, any>;
+        switch (responseType) {
+            case 'json':
+                data = await response.json() as Record<string, any>;
+
+                if (data.error) {
+                    return this.#error(`An error happened: ${data.message ? data.message : data.error.split('/').pop()} (${data.statusCode}) ❌`);
+                }
+
+                break;
+            case 'buffer':
+                data = await response.buffer();
+                break;
+            case 'text':
+                data = await response.text();
+                break;
+            default:
+                return this.#error('Invalid responseType')
+        }
+
+        this.#log(response.status, response.statusText, response.headers.get('content-type'));
+        if (!response.ok) return this.#error(`The server returned a status different from 200 (${response.status}) ❌`);
+
+        return data as T;
+    }
+
+    /**
+     * @private Fetch data from the REST API
+     * @param {string} path api path
+     * @param {string} [method] http method
+     * @param {string} [type] students | parents
+     * @param {string} [body] body to send
+     * @param {string} [responseType] response body type
+     * @param {string} [id] user identifier
+     * @param {object} [customHeaders] additional headers to send
+     * @returns {Promise<any>} the response
+     */
+    async #fetchRest<T>({
+        path = "/",
+        method = "GET",
+        type = "students",
+        body = "",
+        responseType = "json",
+        id = "userId",
+        customHeaders = {}
+    }: RestFetchOptions) {
+        const url = `${this.#getApiUrl()}/${type}/${id == "userId" ? this.user.id : this.user.ident}${path}`;
+
+        return this.#fetch<T>({
+            url,
+            method,
+            body,
+            responseType,
+            customHeaders
+        });
     }
 }
 
