@@ -736,6 +736,16 @@ class Rest {
             customHeaders
         });
     }
+
+    async #fetchMinigame(opts: FetchOptions) {
+        const { minigameToken } = await this.getMinigameToken();
+        return this.#fetch({
+            ...opts,
+            customHeaders: {
+                'Authorization': `Bearer ${minigameToken}`,
+            }
+        })
+    }
 }
 
 export default Rest;
