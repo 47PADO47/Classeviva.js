@@ -30,7 +30,7 @@ type Headers = {
     [key: string]: string;
 };
 
-type FetchType = "students" | "parents" | "users";
+type FetchType = "students" | "parents" | "users" | (string & {});
 type FetchMethod = "GET" | "POST";
 type FetchId = "userId" | "userIdent";
 type FetchResponseType = "json" | "buffer" | "text";
@@ -292,6 +292,11 @@ interface Term {
     version: string,
 }
 
+interface MinigameToken {
+    minigameToken: string;
+    for: string
+}
+
 export {
     ClassOptions,
     User,
@@ -318,4 +323,5 @@ export {
     readNote,
     Term,
     RestFetchOptions,
+    MinigameToken,
 };
