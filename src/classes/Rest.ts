@@ -9,8 +9,7 @@ class Rest {
     readonly #password: string;
     #token: string;
 
-    readonly #state: Enums.State;
-    readonly #baseUrl: string;
+    #state: Enums.State;
     readonly #directory: string;
 
     public login_timeout: NodeJS.Timeout;
@@ -29,7 +28,6 @@ class Rest {
         this.#token = "";
 
         this.#state = state;
-        this.#baseUrl = `https://${Enums.StateUrls[this.#state]}/rest/v1`;
         this.#directory = join(parse(__dirname).dir, '..');
 
         this.login_timeout;
@@ -56,7 +54,7 @@ class Rest {
             "Z-If-None-Match": "",
         };
 
-        this.#log('this.#baseUrl', this.#baseUrl);
+        this.#log('this.#getApiUrl()', this.#getApiUrl());
         this.#log('this.#headers', JSON.stringify(this.#headers));
     }
 
@@ -76,7 +74,7 @@ class Rest {
                 uid: username,
                 pass: password,
             };
-            const url = `${this.#baseUrl}/auth/login/`;
+            const url = `${this.#getApiUrl()}/auth/login/`;
 
             const response: Response = await fetch(url, {
                 method: "POST",
@@ -313,7 +311,7 @@ class Rest {
         if (!this.authorized) return this.#error("Not authorized ❌");
 
         const headers = Object.assign({ "Z-Auth-Token": this.#token }, this.#headers);
-        const res: Response = await fetch(`${this.#baseUrl}/auth/ticket`, {
+        const res: Response = await fetch(`${this.#getApiUrl()}/auth/ticket`, {
             headers
         });
 
@@ -331,7 +329,7 @@ class Rest {
         if (!this.authorized) return this.#error("Not authorized ❌");
 
         const headers = Object.assign({ "Z-Auth-Token": this.#token }, this.#headers);
-        const res: Response = await fetch(`${this.#baseUrl}/auth/avatar`, {
+        const res: Response = await fetch(`${this.#getApiUrl()}/auth/avatar`, {
             headers
         });
 
@@ -468,7 +466,7 @@ class Rest {
         if (!this.authorized) return this.#error("Not authorized ❌");
 
         const headers = Object.assign({ "Z-Auth-Token": this.#token }, this.#headers);
-        const response: Response = await fetch(`${this.#baseUrl}/students/${this.user.ident}/noticeboard/attach/${eventCode}/${id}/`, {
+        const response: Response = await fetch(`${this.#getApiUrl()}/students/${this.user.ident}/noticeboard/attach/${eventCode}/${id}/`, {
             headers
         });
 
@@ -485,7 +483,7 @@ class Rest {
         if (!this.authorized || !token) return this.#error("Not authorized ❌");
 
         const headers = Object.assign({ "Z-Auth-Token": token }, this.#headers);
-        const response: Response = await fetch(`${this.#baseUrl}/auth/status/`, {
+        const response: Response = await fetch(`${this.#getApiUrl()}/auth/status/`, {
             headers
         });
         const data: TokenStatus = await response.json()
@@ -596,12 +594,21 @@ class Rest {
         return res.text();
     }
 
+    setState(newState: Enums.State) {
+        this.#state = newState;
+        this.#log('set state to', newState);
+    };
+
+    #getApiUrl() {
+        return `${this.#getHost()}rest/v1`;
+    }
+
     /**
-     * @private Gets the host of the current url
-     * @returns {string} The host of the current url
+     * @private Returns the classeviva host
+     * @returns {string} The classeviva host
      */
     #getHost(): string {
-        return this.#baseUrl.split('rest')[0];
+        return `https://${Enums.StateUrls[this.#state]}/`;
     }
 
     /**
@@ -711,7 +718,7 @@ class Rest {
         if (!this.authorized) return this.#error("Not logged in ❌");
 
         const headers: HeadersInit = Object.assign(this.#headers, { "Z-Auth-Token": this.#token, ...customHeaders });
-        const url = `${this.#baseUrl}/${type}/${id == "userId" ? this.user.id : this.user.ident}${path}`
+        const url = `${this.#getApiUrl()}/${type}/${id == "userId" ? this.user.id : this.user.ident}${path}`
 
         const options: RequestInit = {
             method: method.toUpperCase(),
