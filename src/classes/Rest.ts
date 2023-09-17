@@ -55,6 +55,9 @@ class Rest {
             "Z-Dev-Apikey": "Tg1NWEwNGIgIC0K",
             "Z-If-None-Match": "",
         };
+
+        this.#log('this.#baseUrl', this.#baseUrl);
+        this.#log('this.#headers', JSON.stringify(this.#headers));
     }
 
     /**
@@ -73,8 +76,9 @@ class Rest {
                 uid: username,
                 pass: password,
             };
-    
-            const response: Response = await fetch(`${this.#baseUrl}/auth/login/`, {
+            const url = `${this.#baseUrl}/auth/login/`;
+
+            const response: Response = await fetch(url, {
                 method: "POST",
                 headers: this.#headers,
                 body: JSON.stringify(userData),
@@ -84,7 +88,7 @@ class Rest {
     
             if (json.error) {
                 this.authorized = false;
-                return this.#error(`An error happened: ${json.message} (${json.statusCode}) ❌`);
+                return this.#error(`An error happened: ${json.message ?? json.error} (${json.statusCode}) ❌`);
             }
 
             if (response.status !== 200) return this.#error(`The server returned a status code other than 200 (${response.status}) ❌`);
@@ -706,18 +710,23 @@ class Rest {
         if (!this.authorized) return this.#error("Not logged in ❌");
 
         const headers: HeadersInit = Object.assign(this.#headers, { "Z-Auth-Token": this.#token, ...customHeaders });
+        const url = `${this.#baseUrl}/${type}/${id == "userId" ? this.user.id : this.user.ident}${path}`
+
         const options: RequestInit = {
             method: method.toUpperCase(),
             headers,
         };
         if (body && method !== "GET") options.body = body;
 
-        const response: Response = await fetch(`${this.#baseUrl}/${type}/${id == "userId" ? this.user.id : this.user.ident}${path}`, options);
+        this.#log(method, url, JSON.stringify(options.body || {}));
+        const response: Response = await fetch(url, options);
 
         const res: FetchResponse = {
             status: response.status,
             data: json ? await response.json() : await response.buffer()
         };
+
+        this.#log(path, response.status, response.statusText);
 
         if (res.data?.error) {
             const { data } = res;
