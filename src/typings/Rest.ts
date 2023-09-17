@@ -315,6 +315,17 @@ interface MinigameLeaderboard {
     positions: MinigamePosition[];
 }
 
+type SchoolDiary = {
+    id_diario: number;
+    nome_diario: string;
+}
+
+interface SchoolCheck {
+    diaries: SchoolDiary[];
+    cvv: boolean;
+    show_privacy: boolean;
+}
+
 export {
     ClassOptions,
     User,
@@ -345,4 +356,5 @@ export {
     Homeworks,
     MinigameScope,
     MinigameLeaderboard,
+    SchoolCheck,
 };
