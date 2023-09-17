@@ -31,7 +31,7 @@ type Headers = {
 };
 
 type FetchType = "students" | "parents" | "users" | (string & {});
-type FetchMethod = "GET" | "POST";
+type FetchMethod = "GET" | "POST" | "PUT";
 type FetchId = "userId" | "userIdent";
 type FetchResponseType = "json" | "buffer" | "text";
 
