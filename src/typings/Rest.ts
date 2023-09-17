@@ -33,19 +33,23 @@ type Headers = {
 type FetchType = "students" | "parents" | "users";
 type FetchMethod = "GET" | "POST";
 type FetchId = "userId" | "userIdent";
+type FetchResponseType = "json" | "buffer" | "text";
 
-interface FetchOptions { 
-    path?: string;
+interface BaseFetchOptions {
     method?: FetchMethod;
-    type?: FetchType;
     body?: BodyInit;
-    json?: boolean;
-    id?: FetchId;
+    responseType?: FetchResponseType;
     customHeaders?: HeadersInit; 
 }
-interface FetchResponse {
-    status: number;
-    data: Json | Buffer;
+
+interface FetchOptions extends BaseFetchOptions {
+    url: string;
+}
+
+interface RestFetchOptions extends BaseFetchOptions {
+    path?: string;
+    type?: FetchType;
+    id?: FetchId;
 }
 interface LoginResponse {
     ident: string,
@@ -293,7 +297,6 @@ export {
     User,
     Headers,
     FetchOptions,
-    FetchResponse,
     LoginResponse,
     AgendaFilter,
     TalkOptions,
@@ -314,4 +317,5 @@ export {
     AgendaNotes,
     readNote,
     Term,
+    RestFetchOptions,
 };
