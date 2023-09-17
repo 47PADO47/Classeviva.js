@@ -301,6 +301,20 @@ interface Homeworks {
     items: any[]
 }
 
+type MinigameScope = 'all' | 'school' | 'class';
+type MinigamePosition = {
+    name: string;
+    score: string;
+}
+type MinigamePlayer = MinigamePosition & {
+    position: number;
+}
+
+interface MinigameLeaderboard {
+    player: MinigamePlayer;
+    positions: MinigamePosition[];
+}
+
 export {
     ClassOptions,
     User,
@@ -329,4 +343,6 @@ export {
     RestFetchOptions,
     MinigameToken,
     Homeworks,
+    MinigameScope,
+    MinigameLeaderboard,
 };
