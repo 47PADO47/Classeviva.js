@@ -528,10 +528,10 @@ class Rest {
         /*
             minigameToken payload: 
             {
-                "exp": 1694988990,
-                "sub": "S8733702V",
-                "aud": "FIII0017",
-                "syr": "2023"
+                "exp": number, //expiration unix timestamp
+                "sub": string, //user identi (with letters)
+                "aud": string, //school code
+                "syr": string //year
             }
         */
         return this.#fetch<MinigameToken>({
