@@ -75,3 +75,15 @@
 > getAucContents
 
 > getAucContentAuths
+
+> getSchoolPresentation
+
+> setState
+
+> getHomeworks
+
+> getMinigameToken
+
+> getMinigameLeaderboard
+
+> checkSchool
