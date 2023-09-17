@@ -518,7 +518,7 @@ class Rest {
     setState(newState: Enums.State) {
         this.#state = newState;
         this.#log('set state to', newState);
-    };
+    }
 
     async getHomeworks() {
         return this.#fetchRest<Homeworks>({ path: '/homeworks' })
@@ -694,7 +694,7 @@ class Rest {
         const response = await fetch(url, options);
         if (response.status === 204) return;
 
-        var data: string | Buffer | Record<string, any>;
+        let data: string | Buffer | Record<string, any>;
         switch (responseType) {
             case 'json':
                 data = await response.json() as Record<string, any>;
