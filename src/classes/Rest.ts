@@ -400,15 +400,16 @@ class Rest {
 
     /**
      * Get the list of contents that's displayed in the app (should be "Classeviva extra")
+     * @param {number} year year of contents
      * @param {boolean} common idk, defaults to true
      * @returns {object[]} An array of objects containing data about the contents that's displayed in the app
      */
-    async getContents(common = true): Promise<ContentElement[] | void> {
+    async getContents(year: string | number = new Date().getFullYear(), common = true): Promise<ContentElement[] | void> {
         if (!this.authorized) return this.#error("Not authorized ❌");
         if (!this.user.school?.code) return this.#error("No school code, please update using getCard() or getCards() ❌");
 
         const headers = Object.assign({ "Z-Auth-Token": this.#token }, this.#headers);
-        const response: Response = await fetch(`${this.#getHost()}/gek/api/v1/${this.user.school.code}/2021/students/contents?common=${common}`, {
+        const response: Response = await fetch(`${this.#getHost()}/gek/api/v1/${this.user.school.code}/${year}/students/contents?common=${common}`, {
             headers
         });
 
