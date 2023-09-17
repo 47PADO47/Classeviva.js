@@ -14,7 +14,7 @@ const Apps = {
     Teachers: "CVVS/docente/2.1.4",
     Inalpi: "classevivaInalpi/3.1.7",
     Tibidabo: "Il Social/1.205",
-    CatalogoSpaggiari: "CatalogoSpaggiari iPad User Agent ;)"
+    //CatalogoSpaggiari: "CatalogoSpaggiari iPad User Agent ;)"
 } as const;
 type App = ObjectValues<typeof Apps>;
 
