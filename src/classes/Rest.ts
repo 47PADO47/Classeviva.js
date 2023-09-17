@@ -307,7 +307,7 @@ class Rest {
      *  Get auth ticket
      * @returns {object} An object containing data about the auth ticket
      */
-    async getTicket(): Promise<TicketResponse> {
+    async getTicket(): Promise<TicketResponse | undefined> {
         return this.#fetch<TicketResponse>({
             url: `${this.#getApiUrl()}/auth/ticket`
         });
@@ -483,8 +483,8 @@ class Rest {
         });
     }
 
-    async readNote(noteType: keyof AgendaNotes, noteId: string | number): Promise<readNote> {
-        const data: { event: readNote } = await this.#fetchRest({ path: `/notes/${noteType}/read/${noteId}/`, method: "POST", type: "students", body: undefined });
+    async readNote(noteType: keyof AgendaNotes, noteId: string | number): Promise<readNote | undefined> {
+        const data: { event: readNote } | undefined = await this.#fetchRest({ path: `/notes/${noteType}/read/${noteId}/`, method: "POST", type: "students", body: undefined });
         return data?.event;
     }
 
@@ -668,7 +668,7 @@ class Rest {
         body,
         responseType = "json",
         customHeaders = {}
-    }: FetchOptions): Promise<T | Promise<never>> {
+    }: FetchOptions): Promise<T | Promise<never> | undefined> {
         if (!this.authorized) return this.#error("Not logged in ❌");
 
         const headers: HeadersInit = {
@@ -686,6 +686,8 @@ class Rest {
         this.#log(method, url, JSON.stringify(options.body || {}));
 
         const response = await fetch(url, options);
+        if (response.status === 204) return;
+
         var data: string | Buffer | Record<string, any>;
         switch (responseType) {
             case 'json':
@@ -744,11 +746,13 @@ class Rest {
     }
 
     async #fetchMinigame<T>(opts: FetchOptions) {
-        const { minigameToken } = await this.getMinigameToken();
+        const data = await this.getMinigameToken();
+        if (!data?.minigameToken) return;
+
         return this.#fetch<T>({
             ...opts,
             customHeaders: {
-                'Authorization': `Bearer ${minigameToken}`,
+                'Authorization': `Bearer ${data.minigameToken}`,
             }
         })
     }
