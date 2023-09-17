@@ -1,10 +1,11 @@
 import { BodyInit, HeadersInit } from "node-fetch";
+import { State, App, userType, userTypesKeys } from "../Enums";
 
 interface ClassOptions {
     username?: string;
     password?: string;
-    state?: string;
-    app?: string;
+    state?: State;
+    app?: App;
     debug?: boolean;
     saveTempFile?: boolean;
 }
@@ -13,7 +14,7 @@ interface User {
     surname?: string;
     id?: number | string;
     ident?: string;
-    type?: string;
+    type?: userType;
     school?: UserSchool;
 }
 
@@ -162,7 +163,7 @@ type NTWN = Note & {
 
 type Card = {
     ident: string,
-    usrType: string,
+    usrType: userTypesKeys,
     usrId: number | string,
     miurSchoolCode: string,
     miurDivisionCode: string,
