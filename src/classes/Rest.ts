@@ -1,7 +1,7 @@
 import fetch, { HeadersInit, RequestInit, Response } from 'node-fetch';
 import { parse, join } from 'path';
 import { readFileSync, writeFileSync } from 'fs';
-import { ClassOptions, User, Headers, LoginResponse, AgendaFilter, TalkOptions, Overview, Card, ContentElement, TermsAgreementResponse, setTermsAgreementResponse, readOptions, TokenStatus, TicketResponse, checkDocument, absences, readNotice, Grade, calendarDay, FetchOptions, resetPassword, AgendaNotes, readNote, Term, RestFetchOptions, MinigameToken, Homeworks, MinigameScope, MinigameLeaderboard } from '../typings/Rest';
+import { ClassOptions, User, Headers, LoginResponse, AgendaFilter, TalkOptions, Overview, Card, ContentElement, TermsAgreementResponse, setTermsAgreementResponse, readOptions, TokenStatus, TicketResponse, checkDocument, absences, readNotice, Grade, calendarDay, FetchOptions, resetPassword, AgendaNotes, readNote, Term, RestFetchOptions, MinigameToken, Homeworks, MinigameScope, MinigameLeaderboard, SchoolCheck } from '../typings/Rest';
 import * as Enums from '../Enums';
 
 class Rest {
@@ -543,6 +543,12 @@ class Rest {
         return await this.#fetchMinigame<MinigameLeaderboard>({
             url: `${this.#getApiUrl()}/minigame/leaderboards/${scope}/${gameId}/${this.user.ident}`,
         });
+    }
+    
+    async checkSchool(schoolCode = this.user.school?.code, year = 2022): Promise<SchoolCheck | undefined> {
+        return await this.#fetch<SchoolCheck>({
+            url: `${this.#getHost()}gek/api/v1/${schoolCode}/${year}/checkSchool`,
+        })
     }
 
     #getApiUrl() {
