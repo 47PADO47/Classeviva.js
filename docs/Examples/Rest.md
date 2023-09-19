@@ -10,6 +10,7 @@
         state: Enums.States.Italy, //Optional: default is Enums.States.Italy
         debug: false, //Optional: default is false, if true it will log some info
         saveTempFile: true, //Optional: default is true, it will save a file with login temp token to avoid hitting the server again if not expired
+        keepAlive: true, //Optional: default is true, if true will attempt to automatically log you in when the token expires
     });
 
     (async () => {
