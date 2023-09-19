@@ -12,8 +12,20 @@
     (async () => {
         await classeviva.login();
 
-        const addresses = await classeviva.getAddressBook()
-        console.log(`You have a total of ${Object.keys(addresses).length} saved addresses`);
+        const groups = await tibidabo.getGroups();
+        const addresses = await tibidabo.getAddressBook();
+
+        const className = "__";
+        const classId = parseInt(groups.find(g => g.gruppo_nome === className).id);
+        
+        const allUsersIds = Object.keys(addresses);
+        const students = allUsersIds.filter(uid => uid.startsWith('S'));
+
+        const classmates = students
+            .map(uid => addresses[uid])
+            .filter((user) => user?.gruppi?.includes(classId));
+
+        console.log(classmates);
 
         setTimeout(() => {
             classeviva.logout();
