@@ -64,7 +64,7 @@ class Tibidabo {
     let cookie = this.#getCookie(emailRes);
     if (!cookie) return this.#error("Login failed (no token)");
     
-    if (!json?.samAuth === null || json?.samAccounts?.length === 0) return this.#error("Login failed (no account)");
+    if (!json || json.samAuth === null || json.samAccounts?.length === 0) return this.#error("Login failed (no account)");
     this.user = json.samAuth;
     this.account = json.samAccounts[0];
 
