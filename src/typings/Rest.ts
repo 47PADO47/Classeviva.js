@@ -8,6 +8,7 @@ interface ClassOptions {
     app?: App;
     debug?: boolean;
     saveTempFile?: boolean;
+    keepAlive?: boolean;
 }
 interface User {
     name?: string;
