@@ -27,35 +27,8 @@ class Tibidabo {
   
     this.email = email || "";
     this.#password = password || "";
-    this.#token = "";
-    
-    this.authorized = false;
-    this.user = {
-      auth_string: "",
-      auth_type: "",
-      cognome: "",
-      nome: "",
-      dinsert: "",
-      id: "",
-      alt_cell: null,
-      alt_codfis: null,
-      alt_fbuid: null,
-      alt_nickname: null,
-      password_changed: "",
-    };
-    this.account = {
-      account_desc: "",
-      account_string: "",
-      dinsert: "",
-      id: "",
-      nome: "",
-      scuola_descrizione: "",
-      scuola_intitolazione: "",
-      scuola_luogo: "",
-      sede_codice: "",
-      target: "",
-      wsc_cat: "",
-    }
+
+    this.#resetAuth();
       
     this.#baseUrl = (path: string = "sps") => `https://web.spaggiari.eu/${path}/app/default/`;
     this.#headers = {
@@ -127,34 +100,7 @@ class Tibidabo {
       return;
     }
 
-    this.#token = "";
-    this.authorized = false;
-    this.user = {
-      auth_string: "",
-      auth_type: "",
-      cognome: "",
-      nome: "",
-      dinsert: "",
-      id: "",
-      alt_cell: null,
-      alt_codfis: null,
-      alt_fbuid: null,
-      alt_nickname: null,
-      password_changed: "",
-    };
-    this.account = {
-      account_desc: "",
-      account_string: "",
-      dinsert: "",
-      id: "",
-      nome: "",
-      scuola_descrizione: "",
-      scuola_intitolazione: "",
-      scuola_luogo: "",
-      sede_codice: "",
-      target: "",
-      wsc_cat: "",
-    }
+    this.#resetAuth();
     return !this.authorized;
   }
 
@@ -463,6 +409,39 @@ class Tibidabo {
 
     if (OAS) return data?.OAS || {};
     return data;
+  }
+
+  #resetAuth() {
+    this.#token = "";
+    this.authorized = false;
+
+    this.user = {
+      auth_string: "",
+      auth_type: "",
+      cognome: "",
+      nome: "",
+      dinsert: "",
+      id: "",
+      alt_cell: null,
+      alt_codfis: null,
+      alt_fbuid: null,
+      alt_nickname: null,
+      password_changed: "",
+    };
+
+    this.account = {
+      account_desc: "",
+      account_string: "",
+      dinsert: "",
+      id: "",
+      nome: "",
+      scuola_descrizione: "",
+      scuola_intitolazione: "",
+      scuola_luogo: "",
+      sede_codice: "",
+      target: "",
+      wsc_cat: "",
+    }
   }
 }
 

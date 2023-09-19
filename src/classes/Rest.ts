@@ -25,25 +25,15 @@ class Rest {
     constructor({ state = Enums.States.Italy, app = Enums.Apps.Students, ...data }: ClassOptions = {}) {
         this.username = data.username || "";
         this.#password = data.password || "";
-        this.#token = "";
 
         this.#state = state;
         this.#directory = join(parse(__dirname).dir, '..');
 
         this.login_timeout;
-        this.expiration = "";
         this.debug = data.debug || false;
         this.saveTempFile = data.saveTempFile ?? true;
 
-        this.authorized = false;
-        this.user = {
-            name: undefined,
-            surname: undefined,
-            id: undefined,
-            ident: undefined,
-            type: undefined,
-            school: {}
-        };
+        this.#resetAuth();
 
         this.#app = app;
         this.#headers = {
@@ -114,10 +104,8 @@ class Rest {
     logout(): true | Promise<never> {
         if (!this.authorized) return this.#error("Already logged out ❌");
         clearTimeout(this.login_timeout);
-        this.authorized = false;
-        this.#token = "";
-        this.user = {};
-        this.expiration = "";
+        
+        this.#resetAuth();
         this.#log("Successfully logged out ✅");
         return true;
     }
@@ -762,6 +750,21 @@ class Rest {
             }
         })
     }
+
+    #resetAuth() {
+        this.authorized = false;
+        this.#token = "";
+        this.expiration = "";
+
+        this.user = {
+            name: undefined,
+            surname: undefined,
+            id: undefined,
+            ident: undefined,
+            type: undefined,
+            school: {}
+        };
+    };
 }
 
 export default Rest;

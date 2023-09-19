@@ -32,22 +32,13 @@ class Web {
     }
   ) {
     this.#data = loginData;
-    this.#token = "";
-    this.authorized = false;
+    this.#resetAuth();
 
     this.#baseUrl = (path: string = "fml") =>
       `https://web.spaggiari.eu/${path}/app/default/`;
     this.#headers = {
       "X-Requested-With": "XMLHttpRequest",
       "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/102.0.5005.63 Safari/537.36 Edg/102.0.1245.33",
-    };
-
-    this.user = {
-      cid: "",
-      cognome: "",
-      nome: "",
-      id: 0,
-      type: "",
     };
   }
 
@@ -95,15 +86,7 @@ class Web {
         return false;
     }
     
-    this.#token = "";
-    this.authorized = false;
-    this.user = {
-      cid: "",
-      cognome: "",
-      nome: "",
-      id: 0,
-      type: "",
-    };
+    this.#resetAuth()
     return !this.authorized;
   }
 
@@ -377,6 +360,20 @@ class Web {
     if (data?.error && data?.error?.length > 0) return this.#error(data?.error || "Unknown error");
 
     return data;
+  }
+
+  #resetAuth() {
+    this.#token = "";
+    this.authorized = false;
+
+    this.user = {
+      cid: "",
+      cognome: "",
+      nome: "",
+      id: 0,
+      type: "",
+    };
+
   }
 }
 
