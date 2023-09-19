@@ -70,7 +70,7 @@ type contact = {
     nome: string | null;
     data_nascita: string | null;
     ident: string;
-    groups?: number[];
+    gruppi?: number[];
 }
 
 type group = {
