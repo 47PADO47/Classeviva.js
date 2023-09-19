@@ -10,8 +10,7 @@ class Web {
   readonly #data: ClassOptions;
   #token: string;
   authorized: boolean;
-  readonly #baseUrl: (path?: string) => string;
-  #headers: { [key: string]: string };
+  #headers: HeadersInit;
   public user: ClassUser;
   /**
    * Web api class constructor
@@ -33,9 +32,6 @@ class Web {
   ) {
     this.#data = loginData;
     this.#resetAuth();
-
-    this.#baseUrl = (path: string = "fml") =>
-      `https://web.spaggiari.eu/${path}/app/default/`;
     this.#headers = {
       "X-Requested-With": "XMLHttpRequest",
       "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/102.0.5005.63 Safari/537.36 Edg/102.0.1245.33",
@@ -374,6 +370,10 @@ class Web {
       type: "",
     };
 
+  }
+
+  #baseUrl(path: string = "fml") {
+    return `https://web.spaggiari.eu/${path}/app/default/`;
   }
 }
 

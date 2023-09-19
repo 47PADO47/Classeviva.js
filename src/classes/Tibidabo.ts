@@ -21,7 +21,6 @@ class Tibidabo {
   public user: User;
   public account: Account;
   
-  readonly #baseUrl: (path?: string) => string;
   #headers: HeadersInit;
   constructor({ email, password }: ClassOptions = {}) {
   
@@ -29,8 +28,7 @@ class Tibidabo {
     this.#password = password || "";
 
     this.#resetAuth();
-      
-    this.#baseUrl = (path: string = "sps") => `https://web.spaggiari.eu/${path}/app/default/`;
+
     this.#headers = {
       "Content-Type": "application/x-www-form-urlencoded",
       "Accept": "application/json",
@@ -442,6 +440,10 @@ class Tibidabo {
       target: "",
       wsc_cat: "",
     }
+  }
+
+  #baseUrl(path: string = "sps") {
+    return `https://web.spaggiari.eu/${path}/app/default/`;
   }
 }
 
