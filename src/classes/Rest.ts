@@ -16,26 +16,28 @@ class Rest {
     public expiration: string;
     public debug: boolean;
     public saveTempFile: boolean;
+    public keepAlive: boolean;
     
     public authorized: boolean;
     public user: User;
 
     readonly #app : Enums.App;
     #headers: Headers;
-    constructor({ state = Enums.States.Italy, app = Enums.Apps.Students, ...data }: ClassOptions = {}) {
-        this.username = data.username || "";
-        this.#password = data.password || "";
+    constructor(opts: ClassOptions = {}) {
+        this.username = opts.username || "";
+        this.#password = opts.password || "";
 
-        this.#state = state;
+        this.#state = opts.state || Enums.States.Italy;
+        this.#app = opts.app || Enums.Apps.Students;
         this.#directory = join(parse(__dirname).dir, '..');
 
         this.login_timeout;
-        this.debug = data.debug || false;
-        this.saveTempFile = data.saveTempFile ?? true;
+        this.debug = opts.debug || false;
+        this.saveTempFile = opts.saveTempFile ?? true;
+        this.keepAlive = opts.keepAlive || true;
 
         this.#resetAuth();
 
-        this.#app = app;
         this.#headers = {
             "Content-Type": "application/json",
             "Accept": "application/json",
@@ -91,9 +93,13 @@ class Rest {
         if (!this.authorized) return this.#error("Failed to login ❌");
 
         this.#log(`Successfully logged in as "${this.user.name} ${this.user.surname}" ✅`);
-        this.login_timeout = setTimeout(() => {
-            this.login();
-        }, 1000 * 60 * 60 * 1.5);
+        if (this.keepAlive) {
+            this.login_timeout = setTimeout(() => {
+                this.login();
+            }, 1000 * 60 * 60 * 1.5);
+            this.#log(`Set login_timeout`);
+        };
+        
         return this.user;
     }
 
