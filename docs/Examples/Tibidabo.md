@@ -12,8 +12,8 @@
     (async () => {
         await classeviva.login();
 
-        const groups = await tibidabo.getGroups();
-        const addresses = await tibidabo.getAddressBook();
+        const groups = await classeviva.getGroups();
+        const addresses = await classeviva.getAddressBook();
 
         const className = "__";
         const classId = parseInt(groups.find(g => g.gruppo_nome === className).id);
