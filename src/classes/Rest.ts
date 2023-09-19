@@ -12,7 +12,7 @@ class Rest {
     #state: Enums.State;
     readonly #directory: string;
 
-    public login_timeout: NodeJS.Timeout;
+    public login_timeout: NodeJS.Timeout | null;
     public expiration: string;
     public debug: boolean;
     public saveTempFile: boolean;
@@ -31,7 +31,7 @@ class Rest {
         this.#app = opts.app || Enums.Apps.Students;
         this.#directory = join(parse(__dirname).dir, '..');
 
-        this.login_timeout;
+        this.login_timeout = null;
         this.debug = opts.debug || false;
         this.saveTempFile = opts.saveTempFile ?? true;
         this.keepAlive = opts.keepAlive || true;
@@ -109,7 +109,7 @@ class Rest {
      */
     logout(): true | Promise<never> {
         if (!this.authorized) return this.#error("Already logged out ❌");
-        clearTimeout(this.login_timeout);
+        if (this.login_timeout) clearTimeout(this.login_timeout);
         
         this.#resetAuth();
         this.#log("Successfully logged out ✅");
