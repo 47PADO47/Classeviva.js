@@ -19,8 +19,7 @@
     "url": "git://github.com/47PADO47/Classeviva.js.git"
   },
   "dependencies": {
-    "node-fetch": "^2.6.7",
-    "tslib": "^2.4.1"
+    "node-fetch": "^2.6.7"
   },
   "license": "MIT",
   "devDependencies": {
