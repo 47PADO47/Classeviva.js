@@ -12,8 +12,10 @@ const Apps = {
     Family: "CVVS/famiglia/4.1.8",
     Aant: "CVVS/aant/2.1.2",
     Teachers: "CVVS/docente/2.1.4",
+    Inalpi: "CVVS/inapli/3.1.7",
     //Inalpi: "classevivaInalpi/3.1.7",
-    //Tibidabo: "Il Social/1.205",
+    //Tibidabo: "OAS User Agent"
+    //Tibidabo: "Il Social/1.205 CFNetwork/1474 Darwin/23.0.0",
     //CatalogoSpaggiari: "CatalogoSpaggiari iPad User Agent ;)"
 } as const;
 type App = ObjectValues<typeof Apps>;
