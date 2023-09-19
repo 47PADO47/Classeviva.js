@@ -41,7 +41,7 @@ class Rest {
         this.#headers = {
             "Content-Type": "application/json",
             "Accept": "application/json",
-            "User-Agent": `${this.#app} iOS/15.4`,
+            "User-Agent": this.#app,
             "Z-Dev-Apikey": "Tg1NWEwNGIgIC0K",
             "Z-If-None-Match": "",
         };
