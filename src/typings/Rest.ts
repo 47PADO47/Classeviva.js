@@ -357,6 +357,34 @@ interface SchoolBooksResponse {
     schoolbooks: CourseBooks[]
 }
 
+type NoticeAttachment = {
+    fileName: string;
+    attachNum: number;
+};
+  
+type Notice = {
+    pubId: number;
+    pubDT: string;
+    readStatus: boolean;
+    evtCode: string;
+    cntId: number;
+    cntValidFrom: string;
+    cntValidTo: string;
+    cntValidInRange: boolean;
+    cntStatus: string;
+    cntTitle: string;
+    cntCategory: string;
+    cntHasChanged: boolean;
+    cntHasAttach: boolean;
+    needJoin: boolean;
+    needReply: boolean;
+    needFile: boolean;
+    needSign: boolean;
+    evento_id: string;
+    dinsert_allegato: string;
+    attachments: NoticeAttachment[];
+};
+
 export {
     ClassOptions,
     User,
@@ -391,4 +419,5 @@ export {
     Book,
     CourseBooks,
     SchoolBooksResponse,
+    Notice,
 };
