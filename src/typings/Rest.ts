@@ -327,6 +327,36 @@ interface SchoolCheck {
     show_privacy: boolean;
 }
 
+interface Book {
+    bookId: number;
+    isbnCode: string;
+    title: string;
+    subheading: string | null;
+    volume: string;
+    author: string;
+    publisher: string;
+    subjectDesc: string;
+    price: number;
+    toBuy: boolean;
+    newAdoption: boolean;
+    alreadyOwned: boolean;
+    alreadyInUse: boolean;
+    recommended: boolean;
+    recommendedFor: string | null;
+    coverUrl: string | null;
+    publisherUnlockCode: string;
+}
+
+interface CourseBooks {
+    courseId: number;
+    courseDesc: string;
+    books: Book[];
+}
+ 
+interface SchoolBooksResponse {
+    schoolbooks: CourseBooks[]
+}
+
 export {
     ClassOptions,
     User,
@@ -358,4 +388,7 @@ export {
     MinigameScope,
     MinigameLeaderboard,
     SchoolCheck,
+    Book,
+    CourseBooks,
+    SchoolBooksResponse,
 };
