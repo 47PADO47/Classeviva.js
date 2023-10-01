@@ -1,7 +1,7 @@
 import fetch, { HeadersInit, RequestInit, Response } from 'node-fetch';
 import { parse, join } from 'path';
 import { readFileSync, writeFileSync } from 'fs';
-import { ClassOptions, User, Headers, LoginResponse, AgendaFilter, TalkOptions, Overview, Card, ContentElement, TermsAgreementResponse, setTermsAgreementResponse, readOptions, TokenStatus, TicketResponse, checkDocument, absences, readNotice, Grade, calendarDay, FetchOptions, resetPassword, AgendaNotes, readNote, Term, RestFetchOptions, MinigameToken, Homeworks, MinigameScope, MinigameLeaderboard, SchoolCheck } from '../typings/Rest';
+import { ClassOptions, User, Headers, LoginResponse, AgendaFilter, TalkOptions, Overview, Card, ContentElement, TermsAgreementResponse, setTermsAgreementResponse, readOptions, TokenStatus, TicketResponse, checkDocument, absences, readNotice, Grade, calendarDay, FetchOptions, resetPassword, AgendaNotes, readNote, Term, RestFetchOptions, MinigameToken, Homeworks, MinigameScope, MinigameLeaderboard, SchoolCheck, SchoolBooksResponse, CourseBooks, Notice } from '../typings/Rest';
 import * as Enums from '../Enums';
 
 class Rest {
@@ -143,7 +143,7 @@ class Rest {
      * @returns {object[]} Array of objects containing the student's grades
      */
     async getGrades(): Promise<Grade[]> {
-        const data: {grades: Grade[]} | void = await this.#fetchRest({ path: `/grades2` });
+        const data = await this.#fetchRest<{grades: Grade[]}>({ path: `/grades2` });
         return data?.grades ?? [];
     }
 
@@ -189,8 +189,8 @@ class Rest {
      * Get student's noticeboard items
      * @returns {object[]} Array of objects containing the student's noticeboard items
      */
-    async getNoticeboard(): Promise<any> {
-        const data: any = await this.#fetchRest({ path: "/noticeboard" });
+    async getNoticeboard(): Promise<Notice[]> {
+        const data = await this.#fetchRest<{items: Notice[]}>({ path: "/noticeboard" });
         return data?.items ?? [];
     }
 
@@ -198,9 +198,9 @@ class Rest {
      * Get student's books
      * @returns {object[]} Array of objects containing the student's books
      */
-    async getSchoolBooks(): Promise<any> {
-        const data: any = await this.#fetchRest({ path: "/schoolbooks" });
-        return data?.schoolbooks ?? [];
+    async getSchoolBooks(): Promise<CourseBooks[] | undefined> {
+        const data = await this.#fetchRest<SchoolBooksResponse>({ path: "/schoolbooks" });
+        return data?.schoolbooks;
     }
 
     /**
