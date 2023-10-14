@@ -385,6 +385,29 @@ type Notice = {
     attachments: NoticeAttachment[];
 };
 
+type Content = {
+    contentId: number;
+    contentName: string;
+    objectId: number;
+    objectType: string;
+    shareDT: string;
+};
+  
+type Folder = {
+    folderId: number;
+    folderName: string;
+    lastShareDT: string;
+    contents: Content[];
+};
+  
+type DidacticsItem = {
+    teacherId: string;
+    teacherName: string;
+    teacherFirstName: string;
+    teacherLastName: string;
+    folders: Folder[];
+};
+
 export {
     ClassOptions,
     User,
@@ -420,4 +443,9 @@ export {
     CourseBooks,
     SchoolBooksResponse,
     Notice,
+    DidacticsItem,
+    Folder,
+    Content,
+    colorType,
+    Lesson,
 };
