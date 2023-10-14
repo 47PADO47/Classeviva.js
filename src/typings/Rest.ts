@@ -83,6 +83,7 @@ interface Overview {
     agenda: AgendaAssignment[],
     grades: Grade[],
     note: AgendaNotes
+    events: absences[],
 }
 
 type Lesson = {
