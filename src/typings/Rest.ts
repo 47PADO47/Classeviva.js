@@ -80,7 +80,7 @@ interface ResponseError {
 interface Overview {
     virtualClassesAgenda: unknown[],
     lessons: Lesson[],
-    agenda: AgendaEvent[],
+    agenda: AgendaAssignment[],
     grades: Grade[],
     note: AgendaNotes
 }
@@ -100,26 +100,25 @@ type Lesson = {
     lessonArg: string,
 };
 
-type AgendaEvent = {
-    evtId: number,
-    evtCode: string,
-    evtDatetimeBegin: string,
-    evtDatetimeEnd: string,
-    isFullDay: boolean,
-    notes: string,
-    evtHpos: number,
-    evtValue: number,
-    isJustified: boolean,
-    justifReasonCode: string,
-    justifReasonDesc: string,
-    hoursAbsence: unknown[],
+type AgendaAssignment = {
+    evtId: number;
+    evtCode: string;
+    evtDatetimeBegin: string;
+    evtDatetimeEnd: string;
+    isFullDay: boolean;
+    notes: string;
+    authorName: string;
+    classDesc: string;
+    subjectId: number | null;
+    subjectDesc: string | null;
+    homeworkId: number | null;
 };
 
 type AgendaNotes = {
     NTTE: Note[],
-    NTCL: unknown[],
+    NTCL: Note[],
     NTWN: NTWN[],
-    NTST: unknown[],
+    NTST: Note[],
 };
 
 type Grade = {
