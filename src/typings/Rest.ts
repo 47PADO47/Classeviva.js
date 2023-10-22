@@ -69,7 +69,8 @@ interface TalkOptions {
     [key: string]: string | number | undefined,
 }
 
-type Json = ResponseError | Overview | any;
+type ApiResponse<T> = (T & object) | ResponseError;
+
 
 interface ResponseError {
     statusCode: number,
@@ -448,4 +449,5 @@ export {
     Content,
     colorType,
     Lesson,
+    ApiResponse,
 };
