@@ -1,17 +1,23 @@
 # Properties
 
+> headers
+
+> httpClient
+
+> debug
+
+> app
+
+> authorized
+
 > username
 
 > login_timeout
 
 > expiration
 
-> debug
-
 > saveTempFile
 
 > keepAlive
-
-> authorized
 
 > user

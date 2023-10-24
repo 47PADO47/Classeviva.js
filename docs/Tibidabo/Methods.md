@@ -38,8 +38,12 @@
 
 > booleanToInt
 
-> getMethods
-
 > setSessionId
 
 > msToUnix
+
+> fetch
+
+> resetAuth
+
+> getPath

@@ -34,8 +34,12 @@
 
 > getAccountInfo
 
-> getMethods
-
 > setSessionId
 
 > msToUnix
+
+> fetch
+
+> resetAuth
+
+> getPath

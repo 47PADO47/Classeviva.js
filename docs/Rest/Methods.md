@@ -32,8 +32,6 @@
 
 > getDidactics
 
-> getMethods
-
 > getParentsOptions
 
 > getOverallTalks
@@ -87,3 +85,11 @@
 > getMinigameLeaderboard
 
 > checkSchool
+
+> getPath
+
+> getHost
+
+> fetch
+
+> resetAuth
