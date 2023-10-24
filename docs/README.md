@@ -1,4 +1,7 @@
 # Docs
+Here you can find infos about the classes contained in this package. Choose a document from the list below:
+
+## Documents
 
 • Rest
 
@@ -14,6 +17,3 @@
 
    - [Methods](Web/Methods.md)
    - [Properties](Web/Properties.md)
-Here you can find infos about the classes contained in this package. Choose a document from the list below:
-
-## Documents
