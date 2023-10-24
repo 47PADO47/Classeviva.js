@@ -6,4 +6,4 @@ export type WithAppOptions = {
 
 export interface WithApp {
     readonly app: App | null;
-};
+}

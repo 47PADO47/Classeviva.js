@@ -5,4 +5,4 @@ export type WithAuthorizationOptions = {
 export interface WithAuthorization {
     authorized: boolean;
     //resetAuth<T = void>(): T
-};
+}

@@ -3,4 +3,4 @@ export type WithLoggingOptions = {
     log?: (...args: any[]) => void;
 }
 
-export interface WithLogging extends Required<WithLoggingOptions> {};
+export interface WithLogging extends Required<WithLoggingOptions> {}
