@@ -177,6 +177,6 @@ class DocsUpdater {
                 .map((prop: string) => `> ${prop}\n`),
         }
     }
-};
+}
 
 export default DocsUpdater;
