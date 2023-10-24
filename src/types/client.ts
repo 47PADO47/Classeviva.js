@@ -2,7 +2,7 @@ import { WithApp, WithAppOptions } from "../interfaces/app";
 import { WithLogging, WithLoggingOptions } from "../interfaces/logging"
 import { WithAuthorization, WithAuthorizationOptions } from "../interfaces/authorization";
 
-interface IBaseApiClient extends WithLogging, WithApp, WithAuthorization {};
+interface IBaseApiClient extends WithLogging, WithApp, WithAuthorization {}
 
 type BaseApiClientOptions = {
     host?: string;
@@ -12,7 +12,7 @@ interface FetchOptions {
     url: string
 }
 
-interface User extends Record<string, any> {};
+interface User extends Record<string, any> {}
 
 export type {
     IBaseApiClient,
