@@ -59,11 +59,7 @@ class Web extends BaseApiClient {
   }
 
   logout() {
-    if (!this.authorized) {
-        this.error("Already logged out");
-        return false;
-    }
-    
+    if (!this.authorized) return true    
     this.resetAuth()
     return !this.authorized;
   }
