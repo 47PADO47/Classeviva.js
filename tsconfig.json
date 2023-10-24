@@ -23,6 +23,7 @@
         "skipLibCheck": true,
         "esModuleInterop": true,
         "strictPropertyInitialization": false,
-        "experimentalDecorators": true
-    }
+        "experimentalDecorators": true,
+    },
+    "include": ["./src/**/*"]
 }
