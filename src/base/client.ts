@@ -51,7 +51,7 @@ abstract class BaseApiClient implements IBaseApiClient {
     
     protected getHost(): string {
         return 'https://web.spaggiari.eu/';
-    };
+    }
 
     protected rebuildHTTPClient() {
         this.httpClient.close();
@@ -89,7 +89,7 @@ abstract class BaseApiClient implements IBaseApiClient {
             .getOwnPropertyNames(Object.getPrototypeOf(this))
             .filter(prop => prop !== "constructor");
     }
-};
+}
 
 
 export default BaseApiClient;
