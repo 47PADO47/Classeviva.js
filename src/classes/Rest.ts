@@ -1,10 +1,11 @@
-import fetch, { HeadersInit, RequestInit, Response } from 'node-fetch';
 import { parse, join } from 'path';
 import { readFileSync, writeFileSync } from 'fs';
-import { ClassOptions, User, Headers, LoginResponse, AgendaFilter, TalkOptions, Overview, Card, ContentElement, TermsAgreementResponse, setTermsAgreementResponse, readOptions, TokenStatus, TicketResponse, checkDocument, absences, readNotice, Grade, calendarDay, FetchOptions, resetPassword, AgendaNotes, readNote, Term, RestFetchOptions, MinigameToken, Homeworks, MinigameScope, MinigameLeaderboard, SchoolCheck, SchoolBooksResponse, CourseBooks, Notice, ApiResponse } from '../typings/Rest';
-import * as Enums from '../Enums';
+import { ClassOptions, User, LoginResponse, AgendaFilter, TalkOptions, Overview, Card, ContentElement, TermsAgreementResponse, setTermsAgreementResponse, readOptions, TokenStatus, TicketResponse, checkDocument, absences, readNotice, Grade, calendarDay, FetchOptions, resetPassword, AgendaNotes, readNote, Term, RestFetchOptions, MinigameToken, Homeworks, MinigameScope, MinigameLeaderboard, SchoolCheck, SchoolBooksResponse, CourseBooks, Notice, ApiResponse } from '../types/rest';
+import * as Enums from '../base/enums';
+import BaseApiClient from '../base/client';
+import { Dispatcher } from 'undici';
 
-class Rest {
+class Rest extends BaseApiClient {
     public readonly username: string;
     readonly #password: string;
     #token: string;
@@ -17,18 +18,19 @@ class Rest {
     public debug: boolean;
     public saveTempFile: boolean;
     public keepAlive: boolean;
-    
-    public authorized: boolean;
-    public user: User;
 
-    readonly #app : Enums.App;
-    #headers: Headers;
+    public user: User;
     constructor(opts: ClassOptions = {}) {
+        super({
+            debug: opts.debug || false,
+            app: opts.app || Enums.Apps.Students,
+            host: 'https://web.spaggiari.eu/'
+        });
+
         this.username = opts.username || "";
         this.#password = opts.password || "";
 
         this.#state = opts.state || Enums.States.Italy;
-        this.#app = opts.app || Enums.Apps.Students;
         this.#directory = join(parse(__dirname).dir, '..');
 
         this.login_timeout = null;
@@ -36,18 +38,11 @@ class Rest {
         this.saveTempFile = opts.saveTempFile ?? true;
         this.keepAlive = opts.keepAlive || true;
 
-        this.#resetAuth();
-
-        this.#headers = {
-            "Content-Type": "application/json",
-            "Accept": "application/json",
-            "User-Agent": this.#app,
+        this.resetAuth();
+        this.setHeaders({
             "Z-Dev-Apikey": "Tg1NWEwNGIgIC0K",
             "Z-If-None-Match": "",
-        };
-
-        this.#log('this.#getApiUrl()', this.#getApiUrl());
-        this.#log('this.#headers', JSON.stringify(this.#headers));
+        })
     }
 
     /**
@@ -56,48 +51,47 @@ class Rest {
      * @param {string} [password] Classeviva credentials password
      * @returns {object} user object
      */
-    async login(username = this.username, password = this.#password): Promise<void | User> {
-        if (this.authorized) return this.#error("Already logged in ❌");
-
-        if (!username || !password) return this.#error("Username or password not set ❌");
+    async login(username = this.username, password = this.#password): Promise<undefined | User> {
+        if (this.authorized) return this.error("Already logged in");
+        if (!username || !password) return this.error("Username or password not set");
 
         if (!await this.#checkTemp() || !this.saveTempFile) {
             const userData = {
                 uid: username,
                 pass: password,
             };
-            const url = `${this.#getApiUrl()}/auth/login/`;
 
-            const response: Response = await fetch(url, {
+            const response = await this.httpClient.request({
+                path: `${this.getPath()}/auth/login/`,
                 method: "POST",
-                headers: this.#headers,
+                headers: this.headers,
                 body: JSON.stringify(userData),
             });
     
-            const json: ApiResponse<LoginResponse> = await response.json();
+            const json = await response.body.json() as ApiResponse<LoginResponse>;
     
             if ("error" in json) {
                 this.authorized = false;
-                return this.#error(`An error happened: ${json.message ?? json.error} (${json.statusCode}) ❌`);
+                return this.error(json.message ?? json.error, json.statusCode);
             }
 
-            if (response.status !== 200) return this.#error(`The server returned a status code other than 200 (${response.status}) ❌`);
+            if (response.statusCode !== 200) return this.error(`The server returned a status code other than 200`, response.statusCode);
             
             this.#updateData(json);
             if (this.saveTempFile) {
                 await writeFileSync(`${this.#directory}/cvv.json`, JSON.stringify(json, null, 2));
-                this.#log("Saved temp file ✅");
+                this.log("Saved temp file ✅");
             }
         }
 
-        if (!this.authorized) return this.#error("Failed to login ❌");
+        if (!this.authorized) return this.error("Failed to login");
 
-        this.#log(`Successfully logged in as "${this.user.name} ${this.user.surname}" ✅`);
+        this.log(`Successfully logged in as "${this.user.name} ${this.user.surname}" ✅`);
         if (this.keepAlive) {
             this.login_timeout = setTimeout(() => {
                 this.login();
             }, 1000 * 60 * 60 * 1.5);
-            this.#log(`Set login_timeout`);
+            this.log(`Set login_timeout`);
         };
         
         return this.user;
@@ -107,12 +101,12 @@ class Rest {
      * Logs out from Classeviva
      * @returns {boolean} true if logged out, error if already logged out
      */
-    logout(): true | Promise<never> {
-        if (!this.authorized) return this.#error("Already logged out ❌");
+    logout(): true {
+        if (!this.authorized) return true;
         if (this.login_timeout) clearTimeout(this.login_timeout);
         
-        this.#resetAuth();
-        this.#log("Successfully logged out ✅");
+        this.resetAuth();
+        this.log("Successfully logged out ✅");
         return true;
     }
 
@@ -165,7 +159,7 @@ class Rest {
      */
     async getAgenda(filter: AgendaFilter = "all", start: Date = new Date(), end: Date = new Date()): Promise<unknown> {
         const filters = ["all", "homework", "other"];
-        if (!filters.includes(filter)) return this.#error("Invalid filter ❌");
+        if (!filters.includes(filter)) return this.error("Invalid filter");
         const map = {
             all: "all",
             homework: "AGHW",
@@ -261,14 +255,6 @@ class Rest {
     }
 
     /**
-     * Get a list of the Classeviva class' functions
-     * @returns {string[]} An array containing the Classeviva class' functions
-     */
-    getMethods(): string[] {
-        return Object.getOwnPropertyNames(Object.getPrototypeOf(this)).filter(prop => prop !== "constructor");
-    }
-
-    /**
      * Get a list of the possible parents options for classeviva
      * @returns {object} An object containing all the possible parents options for classeviva
      */
@@ -302,8 +288,8 @@ class Rest {
      * @returns {object} An object containing data about the auth ticket
      */
     async getTicket(): Promise<TicketResponse | undefined> {
-        return this.#fetch<TicketResponse>({
-            url: `${this.#getApiUrl()}/auth/ticket`
+        return this.fetch<TicketResponse>({
+            url: `${this.getPath()}/auth/ticket`
         });
     }
 
@@ -312,8 +298,8 @@ class Rest {
      * @returns {unknown} The user avatar (not tested)
      */
     async getAvatar() {
-        return this.#fetch({
-            url: `${this.#getApiUrl()}/auth/avatar`
+        return this.fetch({
+            url: `${this.getPath()}/auth/avatar`
         });
     }
 
@@ -380,10 +366,10 @@ class Rest {
      * @returns {object[]} An array of objects containing data about the contents that's displayed in the app
      */
     async getContents(year: string | number = new Date().getFullYear(), common = true): Promise<ContentElement[] | void> {
-        if (!this.user.school?.code) return this.#error("No school code, please update using getCard() or getCards() ❌");
+        if (!this.user.school?.code) return this.error("No school code, please update using getCard() or getCards()");
         
-        return this.#fetch<ContentElement[]>({
-            url: `${this.#getHost()}/gek/api/v1/${this.user.school.code}/${year}/students/contents?common=${common}`
+        return this.fetch<ContentElement[]>({
+            url: `${this.getHost()}/gek/api/v1/${this.user.school.code}/${year}/students/contents?common=${common}`
         });
     }
 
@@ -431,14 +417,22 @@ class Rest {
      * @returns {string} The url of the document
      */
     async getNoticeDocumentUrl(eventCode: string, id: string | number): Promise<string | void> {
-        if (!this.authorized) return this.#error("Not authorized ❌");
+        if (!this.authorized) return this.error("Not authorized");
 
-        const headers = Object.assign({ "Z-Auth-Token": this.#token }, this.#headers);
-        const response: Response = await fetch(`${this.#getApiUrl()}/students/${this.user.ident}/noticeboard/attach/${eventCode}/${id}/`, {
-            headers
+        const headers = {
+            ...this.headers,
+            "Z-Auth-Token": this.#token,
+        };
+        
+        const response = await this.httpClient.request({
+            path: `${this.getPath()}/students/${this.user.ident}/noticeboard/attach/${eventCode}/${id}/`,
+            method: 'GET',
+            headers,
         });
 
-        const url = response.headers.get("Location");
+        const location = response.headers["Location"];
+
+        const url = Array.isArray(location) ? location[0] : location;
         return url ?? "";
     }
 
@@ -447,8 +441,8 @@ class Rest {
      * @returns {object} An object containing data about the token
      */
     async getTokenStatus(): Promise<TokenStatus | void> {
-        return this.#fetch<TokenStatus>({
-            url: `${this.#getApiUrl()}/auth/status`
+        return this.fetch<TokenStatus>({
+            url: `${this.getPath()}/auth/status`
         });
     }
 
@@ -463,8 +457,8 @@ class Rest {
     }
 
     async resetPassword(email: string): Promise<resetPassword | void> {
-        return this.#fetch<resetPassword>({
-            url: `${this.#getHost()}sso/app/default/sam.php?a=akRSPWRQ`,
+        return this.fetch<resetPassword>({
+            url: `${this.getHost()}sso/app/default/sam.php?a=akRSPWRQ`,
             body: `eml=${email}`,
             customHeaders: {
                 "Content-Type": "application/x-www-form-urlencoded",
@@ -479,35 +473,37 @@ class Rest {
     }
 
     async getTerms(): Promise<Term[] | void> {
-        return this.#fetch<Term[]>({
-            url: `${this.#getHost()}auc/api/v2/getTerms`,
+        return this.fetch<Term[]>({
+            url: `${this.getHost()}auc/api/v2/getTerms`,
         });
     }
 
     async getAucContents() {
-        return this.#fetch({
-            url: `${this.#getHost()}auc/api/v2/contents`,
+        return this.fetch({
+            url: `${this.getHost()}auc/api/v2/contents`,
             responseType: "text",
         });
     }
 
     async getAucContentAuths() {
-        return this.#fetch({
-            url: `${this.#getHost()}auc/api/v2/contentAuths`,
+        return this.fetch({
+            url: `${this.getHost()}auc/api/v2/contentAuths`,
             responseType: "text",
         });
     }
 
     async getSchoolPresentation(schoolCode: string) {
-        return this.#fetch<string>({
-            url: `${this.#getHost()}gek/getSchoolPresentation/${schoolCode}`,
+        return this.fetch<string>({
+            url: `${this.getHost()}gek/getSchoolPresentation/${schoolCode}`,
             responseType: "text",
         });
     }
 
     setState(newState: Enums.State) {
         this.#state = newState;
-        this.#log('set state to', newState);
+        this.rebuildHTTPClient();
+
+        this.log('set state to', newState);
     };
 
     async getHomeworks() {
@@ -524,33 +520,33 @@ class Rest {
                 "syr": string //year
             }
         */
-        return this.#fetch<MinigameToken>({
-            url: `${this.#getApiUrl()}/auth/minigame`
+        return this.fetch<MinigameToken>({
+            url: `${this.getPath()}/auth/minigame`
         })
     }
 
     async getMinigameLeaderboard(scope: MinigameScope, gameId: number) {
         return await this.#fetchMinigame<MinigameLeaderboard>({
-            url: `${this.#getApiUrl()}/minigame/leaderboards/${scope}/${gameId}/${this.user.ident}`,
+            url: `${this.getPath()}/minigame/leaderboards/${scope}/${gameId}/${this.user.ident}`,
         });
     }
     
     async checkSchool(schoolCode = this.user.school?.code, year = 2022): Promise<SchoolCheck | undefined> {
-        return await this.#fetch<SchoolCheck>({
-            url: `${this.#getHost()}gek/api/v1/${schoolCode}/${year}/checkSchool`,
+        return await this.fetch<SchoolCheck>({
+            url: `${this.getHost()}gek/api/v1/${schoolCode}/${year}/checkSchool`,
         })
     }
 
-    #getApiUrl() {
-        return `${this.#getHost()}rest/v1`;
+    protected getPath() {
+        return `${this.getHost()}rest/v1`;
     }
 
     /**
      * @private Returns the classeviva host
      * @returns {string} The classeviva host
      */
-    #getHost(): string {
-        return `https://${Enums.StateUrls[this.#state]}/`;
+    protected getHost(state: Enums.State = this.#state): string {
+        return `https://${Enums.StateUrls[state]}/`;
     }
 
     /**
@@ -637,68 +633,45 @@ class Rest {
         return `${year}${month < 10 ? "0" + month : month}${day < 10 ? "0" + day : day}`;
     }
 
-    /**
-     * @private Rejects the promise and logs the error
-     * @param message error message
-     * @returns {Promise<never>} rejected promise
-     */
-    #error(message: string): Promise<never> {
-        this.#log(message);
-        return Promise.reject(message);
-    }
-
-    /**
-     * @private Logs whatever provided
-     * @param  {any[]} args arguments to log
-     * @returns {void} log in the console
-     */
-    #log(...args: any[]): void {
-        if (!this.debug) return;
-        console.log(`\x1b[31m[CLASSEVIVA]\x1b[0m`, ...args);
-    }
-
-
-    async #fetch<T = unknown>({
+    protected async fetch<T = unknown>({
         url,
         method = "GET",
         body,
         responseType = "json",
         customHeaders = {}
     }: FetchOptions): Promise<T | undefined> {
-        if (!this.authorized) return this.#error("Not logged in ❌");
+        if (!this.authorized) return this.error("Not logged in");
 
-        const headers: HeadersInit = {
-            ...this.#headers,
+        const headers: Record<string, string> = {
+            ...this.headers,
             "Z-Auth-Token": this.#token,
-            ...customHeaders
+            ...customHeaders,
         };
 
-        const options: RequestInit = {
-            method: method.toUpperCase(),
+        const options: Dispatcher.RequestOptions = {
+            path: url,
+            method,
             headers,
             body: method.toUpperCase() !== 'GET' ? body : undefined
         };
 
-        this.#log(method, url, JSON.stringify(options.body || {}));
-
-        const response = await fetch(url, options);
-        this.#log(response.status, response.statusText, response.headers.get('content-type'));
+        const response = await this.httpClient.request(options);
 
         switch (responseType) {
             case 'json':
-                const data = await response.json() as ApiResponse<T>;
+                const data = await response.body.json() as ApiResponse<T>;
 
                 if ("error" in data) {
-                    return this.#error(`An error happened: ${data.message ? data.message : data.error.split('/').pop()} (${data.statusCode}) ❌`);
+                    return this.error(data.message ? data.message : (data.error.split('/').pop() ?? 'Unknown error'), data.statusCode);
                 }
 
                 return data;
             case 'buffer':
-                return await response.buffer() as T;
+                return await response.body.blob() as T;
             case 'text':
-                return await response.text() as T;
+                return await response.body.text() as T;
             default:
-                return this.#error('Invalid responseType')
+                return this.error('Invalid responseType')
         }
     }
 
@@ -719,9 +692,9 @@ class Rest {
         id = "userId",
         ...opts
     }: RestFetchOptions) {
-        const url = `${this.#getApiUrl()}/${type}/${id == "userId" ? this.user.id : this.user.ident}${path}`;
+        const url = `${this.getPath()}/${type}/${id == "userId" ? this.user.id : this.user.ident}${path}`;
 
-        return this.#fetch<T>({
+        return this.fetch<T>({
             url,
             ...opts,
         });
@@ -731,7 +704,7 @@ class Rest {
         const data = await this.getMinigameToken();
         if (!data?.minigameToken) return;
 
-        return this.#fetch<T>({
+        return this.fetch<T>({
             ...opts,
             customHeaders: {
                 'Authorization': `Bearer ${data.minigameToken}`,
@@ -739,7 +712,7 @@ class Rest {
         })
     }
 
-    #resetAuth() {
+    protected resetAuth() {
         this.authorized = false;
         this.#token = "";
         this.expiration = "";
@@ -752,6 +725,8 @@ class Rest {
             type: undefined,
             school: {}
         };
+
+        return this;
     };
 }
 

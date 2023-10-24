@@ -1,16 +1,16 @@
-import fetch, { HeadersInit, RequestInit, Response } from "node-fetch";
+import { Dispatcher } from "undici";
+import BaseApiClient from "../base/client";
 import {
   ClassOptions,
   ClassUser,
   FetchOptions,
+  LoginData,
   prodotto,
-} from "../typings/Web";
+} from "../types/web";
 
-class Web {
-  readonly #data: ClassOptions;
+class Web extends BaseApiClient {
+  readonly #loginData: LoginData;
   #token: string;
-  authorized: boolean;
-  #headers: HeadersInit;
   public user: ClassUser;
   /**
    * Web api class constructor
@@ -21,68 +21,50 @@ class Web {
    * @param {string} [loginData.pin] PIN (???)
    * @param {string} [loginData.target] Target (???)
    */
-  constructor(
-    loginData: ClassOptions = {
-      cid: "",
-      uid: "",
-      pwd: "",
-      pin: "",
-      target: "",
-    }
-  ) {
-    this.#data = loginData;
-    this.#resetAuth();
-    this.#headers = {
-      "X-Requested-With": "XMLHttpRequest",
-      "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/102.0.5005.63 Safari/537.36 Edg/102.0.1245.33",
-    };
+  constructor(options: ClassOptions = {}) {
+    super({
+      debug: options.debug || false,
+    });
+
+    this.#loginData = options.credentials || { uid: "", pwd: "", };
+    this.resetAuth();
   }
 
-  async login(data: ClassOptions = this.#data): Promise<boolean> {
-    const url = `${this.#baseUrl("auth-p7")}AuthApi4.php?a=aLoginPwd`;
+  async login(data: LoginData = this.#loginData): Promise<ClassUser | undefined> {
+    const url = `${this.getPath("auth-p7")}AuthApi4.php?a=aLoginPwd`;
     const body = new URLSearchParams(Object.entries(data)).toString();
 
-    const response = await fetch(url, {
+    const response = await this.httpClient.request({
+      path: url,
       method: "POST",
       body,
-      headers: {
-        "Content-Type": "application/x-www-form-urlencoded",
-        "X-Requested-With": "XMLHttpRequest",
-        Referer: "https://web.spaggiari.eu/home/app/default/login.php",
-        Origin: "https://web.spaggiari.eu",
-      },
     });
 
     const json = await response
+      .body
       .json()
-      .catch(() => this.#error("Could not parse JSON"));
+      .catch(() => this.error("Could not parse JSON")) as any;
 
-    if (json?.error && json.error?.length > 0) return this.#error(json.error);
+    if ("error" in json && json.error?.length > 0) return this.error(json.error, response.statusCode);
 
-    const cookies = response.headers.get("Set-Cookie");
-    const cookie = cookies?.split(", ").pop();
-    /*
-    const values = cookie?.split(';') ?? [''];
-    const session = values[0];
-    const token = session.split('PHPSESSID=').pop();
-    */
+    const cookie = this.getCookie(response, "set-cookie");
+    if (!cookie) return this.error("Login failed (no token)", response.statusCode);
 
-    if (!cookie) return this.#error("Login failed (no token)");
     this.setSessionId(cookie);
 
-    if (!json?.data?.auth?.accountInfo) return this.#error("Login failed (no account info)");
+    if (!json?.data?.auth?.accountInfo) return this.error("Login failed (no account info)", response.statusCode);
     this.user = json.data.auth.accountInfo;
 
-    return this.authorized;
+    return this.user;
   }
 
   logout() {
     if (!this.authorized) {
-        this.#error("Already logged out");
+        this.error("Already logged out");
         return false;
     }
     
-    this.#resetAuth()
+    this.resetAuth()
     return !this.authorized;
   }
 
@@ -99,7 +81,7 @@ class Web {
       end: this.msToUnix(end).toString(),
     });
 
-    const response = await this.#fetch({
+    const response = await this.fetch({
       url: `agenda_studenti.php?ope=get_events&${query.toString()}`,
       path: "fml",
       method: "GET",
@@ -111,7 +93,7 @@ class Web {
   }
 
   async getPortfolio(): Promise<any> {
-    const data = await this.#fetch({ url: "get_pfolio.php", path: "tools" });
+    const data = await this.fetch({ url: "get_pfolio.php", path: "tools" });
     return data ?? {};
   }
 
@@ -142,7 +124,7 @@ class Web {
       formato,
     });
 
-    const response = await this.#fetch({
+    const response = await this.fetch({
       url: `xml_export.php?${query.toString()}`,
       method: "GET",
       json: false,
@@ -152,7 +134,7 @@ class Web {
   }
 
   async getUnreadMessages(): Promise<number | undefined> {
-    const response = await this.#fetch({
+    const response = await this.fetch({
       url: "SocMsgApi.php?a=acGetUnreadCount",
       path: "sps",
     });
@@ -160,7 +142,7 @@ class Web {
   }
 
   async getUsername(): Promise<{ name?: string; username?: string }> {
-    const response = await this.#fetch({
+    const response = await this.fetch({
       url: "get_username.php",
       path: "tools",
     });
@@ -171,7 +153,7 @@ class Web {
     prodotto: prodotto | "" = "",
     cerca: string = ""
   ): Promise<any> {
-    const response = await this.#fetch({
+    const response = await this.fetch({
       url: `documentazione.xhr.php?act=get_faq_autocomplete&prodotto=${prodotto}&find=${cerca}`,
       path: "acc",
     });
@@ -179,11 +161,11 @@ class Web {
   }
 
   async getDocumentationUrl(prodotto: prodotto, id: number): Promise<string> {
-    return `${this.#baseUrl("acc")}documentazione.php?prodotto=${prodotto}&cerca=d:${id}`;
+    return `${this.getPath("acc")}documentazione.php?prodotto=${prodotto}&cerca=d:${id}`;
   }
 
   async getAvatar(): Promise<any> {
-    const response = await this.#fetch({
+    const response = await this.fetch({
       url: "get_avatar.php",
       path: "tools",
     });
@@ -191,7 +173,7 @@ class Web {
   }
 
   async getAcGooBApiKey(): Promise<string> {
-    const response = await this.#fetch({
+    const response = await this.fetch({
       url: "SocMsgApi.php?a=acGooBApiK",
       path: "sps",
     });
@@ -199,7 +181,7 @@ class Web {
   }
 
   async getRubrica(): Promise<any> {
-    const response = await this.#fetch({
+    const response = await this.fetch({
       url: "SocMsgApi.php?a=acGetRubrica",
       path: "sps",
     });
@@ -223,7 +205,7 @@ class Web {
       _stkx: "",
     });
 
-    const response = await this.#fetch({
+    const response = await this.fetch({
       url: "SocMsgApi.php?a=acGetMsgPag",
       path: "sps",
       method: "POST",
@@ -240,7 +222,7 @@ class Web {
       tipo_com: "",
     });
 
-    const response = await this.#fetch({
+    const response = await this.fetch({
       url: `bacheca_personale.php?${quesry.toString()}`,
       path: "sif",
     });
@@ -254,7 +236,7 @@ class Web {
       id_relazioni: ids,
     });
 
-    const response = await this.#fetch({
+    const response = await this.fetch({
       url: `bacheca_personale.php?${query}`,
       path: "sif",
       method: "GET",
@@ -271,7 +253,7 @@ class Web {
       params,
     });
 
-    const response = await this.#fetch({
+    const response = await this.fetch({
       url: `pubblicazioni.php?${query.toString()}`,
       path: "sol",
     });
@@ -281,7 +263,7 @@ class Web {
 
   // need to find a way to get only json
   /*async getRecuperi(quad: number) {
-        const response = await this.#fetch(
+        const response = await this.fetch(
             `scrutinio_singolo_recuperi.php?quad=${quad}`,
             'sol',
             'GET',
@@ -296,7 +278,7 @@ class Web {
     };*/
 
   async getAccountInfo() {
-    const response = await this.#fetch({
+    const response = await this.fetch({
       url: "OtpApi.php?a=recStatus",
       path: "auth",
     });
@@ -304,13 +286,9 @@ class Web {
     return response ?? {};
   }
 
-  getMethods(): string[] {
-    return Object.getOwnPropertyNames(Object.getPrototypeOf(this)).filter(prop => prop !== "constructor");
-  }
-
   public setSessionId(token: string): void {
     this.#token = token;
-    this.#setAuthorized(true);
+    this.authorized =  true;
   }
 
   public msToUnix(ms: Date | number): number {
@@ -318,15 +296,7 @@ class Web {
     return Math.floor(num / 1000);
   }
 
-  #setAuthorized(authorized: boolean): void {
-    this.authorized = authorized;
-  }
-
-  #error(message: string): Promise<never> {
-    return Promise.reject(message);
-  }
-
-  async #fetch({
+  protected async fetch({
     url,
     path,
     method = "GET",
@@ -334,31 +304,34 @@ class Web {
     headers: head = {},
     json = true,
   }: FetchOptions): Promise<any> {
-    if (!this.authorized) return this.#error("Not logged in ❌");
+    if (!this.authorized) return this.error("Not logged in ❌");
 
-    const headers: HeadersInit = Object.assign(this.#headers, {
+    const headers = {
+      ...this.headers,
       Cookie: this.#token,
       ...head,
-    });
-    const options: RequestInit = {
-      method: method.toUpperCase(),
+    };
+
+    const options: Dispatcher.RequestOptions = {
+      path: `${this.getPath(path)}${url}`,
+      method,
       headers,
     };
     if (body && method !== "GET") options.body = body;
 
-    const response: Response = await fetch(`${this.#baseUrl(path)}${url}`, options);
-    if (!response.ok) return this.#error(`Response not ok (${response.status} - ${response.statusText})`);
+    const response = await this.httpClient.request(options);
+    if (response.statusCode < 200 || response.statusCode > 299) return this.error(`Response not ok`, response.statusCode);
 
-    const data = json
-      ? await response.json().catch(() => this.#error("Could not parse JSON"))
-      : await response.text().catch(() => this.#error("Could not parse Text"));
+    const data = (json
+      ? await response.body.json().catch(() => this.error("Could not parse JSON"))
+      : await response.body.text().catch(() => this.error("Could not parse Text"))) as any;
 
-    if (data?.error && data?.error?.length > 0) return this.#error(data?.error || "Unknown error");
+    if ("error" in data && data.error.length > 0) return this.error(data.error.toString(), response.statusCode);
 
     return data;
   }
 
-  #resetAuth() {
+  protected resetAuth() {
     this.#token = "";
     this.authorized = false;
 
@@ -369,11 +342,12 @@ class Web {
       id: 0,
       type: "",
     };
-
+    
+    return this;
   }
 
-  #baseUrl(path: string = "fml") {
-    return `https://web.spaggiari.eu/${path}/app/default/`;
+  protected getPath(path: string = "fml") {
+    return `${this.getHost()}${path}/app/default/`;
   }
 }
 

@@ -1,5 +1,6 @@
-import fetch, { HeadersInit, RequestInit, Response } from "node-fetch";
-import { userTypesKeys } from "../Enums";
+import { Dispatcher } from "undici";
+import BaseApiClient from "../base/client";
+import { userTypesKeys } from "../base/enums";
 import {
   ClassOptions,
   AuthObject,
@@ -10,100 +11,99 @@ import {
   addressBook,
   group,
   contactInfo,
-} from "../typings/Tibidabo";
+  LoginOptions,
+} from "../types/tibidabo";
 
-class Tibidabo {
+class Tibidabo extends BaseApiClient {
   public readonly email: string;
   readonly #password: string;
   #token: string;
 
-  public authorized: boolean;
   public user: User;
   public account: Account;
-  
-  #headers: HeadersInit;
-  constructor({ email, password }: ClassOptions = {}) {
-  
-    this.email = email || "";
-    this.#password = password || "";
+  constructor(options: ClassOptions = {}) {
+    super({
+      debug: options.debug || false,
+    });
 
-    this.#resetAuth();
+    this.email = options.email || "";
+    this.#password = options.password || "";
 
-    this.#headers = {
+    this.resetAuth();
+
+    this.setHeaders({
       "Content-Type": "application/x-www-form-urlencoded",
-      "Accept": "application/json",
       "User-Agent": `OAS User Agent`,
-      "X-Requested-With": "XMLHttpRequest",
-    };
+    });
   }
 
-  async login(data: ClassOptions = {
+  async login(data: LoginOptions = {
     email: this.email,
     password: this.#password,
-  }): Promise<boolean> {
-    if (!this.isEmail(data.email ?? '')) return this.#error("Invalid email");
+  }): Promise<User | undefined> {
+    if (!this.isEmail(data.email ?? '')) return this.error("Invalid email");
 
-    const url = `${this.#baseUrl("home")}login-sso.php`;
+    const url = `${this.getPath("home")}login-sso.php`;
     const obj: AuthObject = {
       u: data.email || '',
       p: data.password || '',
     };
 
-    const emailRes = await fetch(`${url}?a=emlLogin`, {
+    const emailRes = await this.httpClient.request({
+      path: `${url}?a=emlLogin`,
       method: "POST",
       body: this.#objToURLParams(obj),
-      headers: this.#headers,
+      headers: this.headers,
     });
 
     const json = await emailRes
+      .body
       .json()
-      .catch(() => this.#error("Could not parse JSON"));
+      .catch(() => this.error("Could not parse JSON")) as any;
 
-    if (json?.errNo !== 0 && json?.ok && json?.errDeco?.length > 0) return this.#error(json.errDeco[json.errNo]);
+    if (json?.errNo !== 0 && json?.ok && json?.errDeco?.length > 0) return this.error(json.errDeco[json.errNo], emailRes.statusCode);
 
-    let cookie = this.#getCookie(emailRes);
-    if (!cookie) return this.#error("Login failed (no token)");
+    let cookie = this.getCookie(emailRes, "set-cookie");
+    if (!cookie) return this.error("Login failed (no token)", emailRes.statusCode);
     
-    if (!json || json.samAuth === null || json.samAccounts?.length === 0) return this.#error("Login failed (no account)");
+    if (!json || json.samAuth === null || json.samAccounts?.length === 0) return this.error("Login failed (no account)", emailRes.statusCode);
     this.user = json.samAuth;
     this.account = json.samAccounts[0];
 
     obj.c = this.account.sede_codice;
     obj.u = this.account.account_string;
-    const authRes = await fetch(`${url}?a=stdLogin`, {
+    const authRes = await this.httpClient.request({
+      path: `${url}?a=stdLogin`,
       method: "POST",
       body: this.#objToURLParams(obj),
       headers: {
         Cookie: cookie,
-        ...this.#headers,
+        ...this.headers,
       },
     });
 
     const authJson = await authRes
+      .body
       .json()
-      .catch(() => this.#error("Could not parse JSON"));
+      .catch(() => this.error("Could not parse JSON")) as any;
 
-    if (!authJson?.auth) return this.#error(`Login failed (${authJson?.error ?? "unknown error"})`);
+    if (!authJson?.auth) return this.error(`Login failed (${authJson?.error ?? "unknown error"})`, authRes.statusCode);
 
-    cookie = this.#getCookie(authRes);
-    if (!cookie) return this.#error("Login failed (no token)");
+    cookie = this.getCookie(authRes, "set-cookie");
+    if (!cookie) return this.error("Login failed (no token)", authRes.statusCode);
     this.setSessionId(cookie);
 
-    return this.authorized;
+    return this.user;
   }
 
   logout() {
-    if (!this.authorized) {
-      this.#error("Already logged out");
-      return;
-    }
-
-    this.#resetAuth();
+    if (!this.authorized) return true;
+    this.resetAuth();
     return !this.authorized;
   }
 
   async whoami() {
-    const data = await this.#fetch({
+    const data = await this.fetch({
       url: `SocMsgApi.php`,
       body: {
         a: "acWhoAmI",
@@ -114,7 +114,7 @@ class Tibidabo {
   }
 
   async getOASSettings() {
-    const data = await this.#fetch({
+    const data = await this.fetch({
       url: `oas_services4.php`,
       path: 'oas',
       body: {
@@ -123,13 +123,13 @@ class Tibidabo {
       OAS: false,
     });
 
-    if (data?.errori) return this.#error(data.errori.toString());
+    if (data?.errori) return this.error(data.errori.toString());
 
     return data;
   }
 
   async getUserInfo(userId: number | string, accountType: userTypesKeys) {
-    const data = await this.#fetch({
+    const data = await this.fetch({
       url: `SocMsgApi.php`,
       body: {
         a: "acUserGetInfo",
@@ -142,7 +142,7 @@ class Tibidabo {
   }
 
   async getMsgTargets(withUsers: boolean = true): Promise<msgTargets> {
-    const data: {targets: msgTargets} = await this.#fetch({
+    const data: {targets: msgTargets} = await this.fetch({
       url: `SocMsgApi.php`,
       body: {
         //a: "acGetMsgTargets",
@@ -155,7 +155,7 @@ class Tibidabo {
   }
 
   async getAddressBook(withGroups: boolean = true): Promise<addressBook> {
-    const data: {data: {net: addressBook}} = await this.#fetch({
+    const data: {data: {net: addressBook}} = await this.fetch({
       url: `GroupsApi.php`,
       body: {
         a: 'aNetList',
@@ -170,7 +170,7 @@ class Tibidabo {
   }
 
   async getGroups(withLongDescription: boolean = true, withPhoto: boolean = true, withXmlInfo: boolean = true): Promise<group[]> {
-    const data: {data:{groups: group[]}} = await this.#fetch({
+    const data: {data:{groups: group[]}} = await this.fetch({
       url: `GroupsApi.php`,
       body: {
         a: 'aGrpListOf',
@@ -188,7 +188,7 @@ class Tibidabo {
   }
   
   async getContactInfo(accountStringIdent: string): Promise<contactInfo> {
-    const data: contactInfo = await this.#fetch({
+    const data: contactInfo = await this.fetch({
       url: `SocMsgApi.php`,
       body: {
         a: 'acGetPUInfo',
@@ -212,7 +212,7 @@ class Tibidabo {
       ignpf: 0, */
     };
     
-    const data = await this.#fetch({
+    const data = await this.fetch({
       url: `SocMsgApi.php`,
       body,
     });
@@ -221,7 +221,7 @@ class Tibidabo {
   }
 
   async setMessageAsRead(messageId: number | string) {
-    const data = await this.#fetch({
+    const data = await this.fetch({
       url: `SocMsgApi.php`,
       body: {
         a: 'acSetDRead',
@@ -233,7 +233,7 @@ class Tibidabo {
   }
 
   async postComment(messageId: number | string, comment: string) {
-    const data = await this.#fetch({
+    const data = await this.fetch({
       url: `messaggi.php`,
       path: 'sps-api',
       body: {
@@ -247,7 +247,7 @@ class Tibidabo {
   }
 
   async likeMessage(messageId: number | string) {
-    const data = await this.#fetch({
+    const data = await this.fetch({
       url: `SocMsgApi.php`,
       body: {
         a: 'acSwitchLikePost',
@@ -259,7 +259,7 @@ class Tibidabo {
   }
 
   async getUnreadMessagesCount(): Promise<number> {
-    const data = await this.#fetch({
+    const data = await this.fetch({
       url: `SocMsgApi.php`,
       body: {
         a: 'acGetUnreadCount',
@@ -271,7 +271,7 @@ class Tibidabo {
 
   //sends message, but apparently they dont show up
   async sendMessage(message: string, subject: string, targetID: number | string) {
-    const data = await this.#fetch({
+    const data = await this.fetch({
       url: `messaggi.php`,
       path: 'sps-api',
       body: {
@@ -287,7 +287,7 @@ class Tibidabo {
 
   // Throws "010/Permission denied"
   /*async addMoreTargets(messageId: string, targetID: number | string) {
-    const data = await this.#fetch({
+    const data = await this.fetch({
       url: `messaggi.php`,
       path: 'sps-api',
       body: `a=acAddMoreTargets&mids[]=${messageId}&uids[]=${targetID}`,
@@ -297,7 +297,7 @@ class Tibidabo {
   }*/
 
   async removeMeFromThread(threadMsgId: string | number) {
-    const data = await this.#fetch({
+    const data = await this.fetch({
       url: `messaggi.php`,
       path: 'sps-api',
       body: {
@@ -310,7 +310,7 @@ class Tibidabo {
   }
 
   async reportMessage(messageId: string | number) {
-    const data = await this.#fetch({
+    const data = await this.fetch({
       url: `messaggi.php`,
       path: 'sps-api',
       body: {
@@ -323,7 +323,7 @@ class Tibidabo {
   }
 
   /*async addMessageAttachment(messageId: string | number, attachment: Buffer) {
-    const data = await this.#fetch({
+    const data = await this.fetch({
       url: `messaggi.php`,
       path: 'sps-api',
       //form data
@@ -345,24 +345,14 @@ class Tibidabo {
     const re = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
     return re.test(email.toLowerCase());
   }
-
-  #getCookie(response: Response): string {
-    const cookies = response.headers.get("Set-Cookie");
-    const cookie = cookies?.split(", ").pop();
-    return cookie ?? "";
-  }
   
   booleanToInt(bool: boolean): number {
     return bool ? 1 : 0;
   }
 
-  getMethods(): string[] {
-    return Object.getOwnPropertyNames(Object.getPrototypeOf(this)).filter(prop => prop !== "constructor");
-  }
-
   public setSessionId(token: string): void {
     this.#token = token;
-    this.#setAuthorized(true);
+    this.authorized =  true;
   }
 
   public msToUnix(ms: Date | number): number {
@@ -370,46 +360,41 @@ class Tibidabo {
     return Math.floor(num / 1000);
   }
 
-  #setAuthorized(authorized: boolean): void {
-    this.authorized = authorized;
-  }
-
-  #error(message: string): Promise<never> {
-    return Promise.reject(message);
-  }
-
-  async #fetch({
+  protected async fetch<T = any>({
     url,
     path,
     method = "POST",
     body,
     headers: head = {},
     OAS = true,
-  }: FetchOptions): Promise<any> {
-    if (!this.authorized) return this.#error("Not logged in ❌");
+  }: FetchOptions): Promise<T> {
+    if (!this.authorized) return this.error("Not logged in ❌");
 
-    const headers: HeadersInit = Object.assign(this.#headers, {
+    const headers = {
+      ...this.headers,
       Cookie: this.#token,
       ...head,
-    });
-    const options: RequestInit = {
-      method: method.toUpperCase(),
+    };
+
+    const options: Dispatcher.RequestOptions = {
+      path: `${this.getPath(path)}${url}`,
+      method,
       headers,
     };
     if (body && method !== "GET") options.body = this.#objToURLParams(body);
 
-    const response: Response = await fetch(`${this.#baseUrl(path)}${url}`, options);
-    if (!response.ok) return this.#error(`Response not ok (${response.status} - ${response.statusText})`);
+    const response = await this.httpClient.request(options);
+    if (response.statusCode < 200 || response.statusCode > 299) return this.error(`Response not ok`, response.statusCode);
 
-    const data = await response.json().catch(() => this.#error("Could not parse JSON"));
+    const data = await response.body.json().catch(() => this.error("Could not parse JSON")) as any;
 
-    if (data?.error && data?.error?.length > 0) return this.#error(data?.error?.toString() || "Unknown error");
+    if ("error" in data && data.error.length > 0) return this.error(data.error.toString(), response.statusCode);
+    if (OAS && "OAS" in data) return data?.OAS || {};
 
-    if (OAS) return data?.OAS || {};
     return data;
   }
 
-  #resetAuth() {
+  protected resetAuth() {
     this.#token = "";
     this.authorized = false;
 
@@ -440,10 +425,12 @@ class Tibidabo {
       target: "",
       wsc_cat: "",
     }
+
+    return this;
   }
 
-  #baseUrl(path: string = "sps") {
-    return `https://web.spaggiari.eu/${path}/app/default/`;
+  protected getPath(path: string = "sps") {
+    return `${this.getHost()}${path}/app/default/`;
   }
 }
 
