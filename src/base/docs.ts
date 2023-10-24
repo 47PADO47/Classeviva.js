@@ -28,7 +28,7 @@ class DocsUpdater {
         const distPath: string = join(process.cwd(), 'dist');
         if (!await this.existsOrCreate({ path: distPath, create: false })) return this.error('Missing dist folder, please compile');
 
-        const classesPath: string = join(distPath, 'src', 'classes');
+        const classesPath: string = join(distPath, 'classes');
         if (!await this.existsOrCreate({ path: classesPath })) return this.error('Missing classes dir');
 
         const classes: string[] = fs
