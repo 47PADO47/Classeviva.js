@@ -1,0 +1,12 @@
+version: 2
+updates:
+  - package-ecosystem: "npm"
+    allow:
+      - dependency-type: "production"
+    directory: "/"
+    commit-message:
+      prefix: "⬆️ "
+    schedule:
+      interval: "daily"
+      time: "07:00"
+      timezone: "Europe/Berlin"
