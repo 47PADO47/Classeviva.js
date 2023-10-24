@@ -7,7 +7,7 @@
   "scripts": {
     "test": "jest ./tests/",
     "build": "npx tsc",
-    "update:docs": "node dist/src/UpdateDocs.js && git add . && git diff-index --cached --quiet HEAD || ( git commit -a -m \"📋 Update docs\" && git push)"
+    "update:docs": "node dist/UpdateDocs.js && git add . && git diff-index --cached --quiet HEAD || ( git commit -a -m \"📋 Update docs\" && git push)"
   },
   "keywords": [
     "classeviva"
