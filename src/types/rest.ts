@@ -1,15 +1,16 @@
-import { BodyInit, HeadersInit } from "node-fetch";
-import { State, App, userType, userTypesKeys } from "../Enums";
+import { State, userType, userTypesKeys } from "../base/enums";
+import { Dispatcher } from 'undici';
+import { WithLoggingOptions } from "../interfaces/logging";
+import { WithAppOptions } from "../interfaces/app";
 
-interface ClassOptions {
+interface ClassOptions extends Partial<WithLoggingOptions>, Partial<WithAppOptions> {
     username?: string;
     password?: string;
     state?: State;
-    app?: App;
-    debug?: boolean;
     saveTempFile?: boolean;
     keepAlive?: boolean;
 }
+
 interface User {
     name?: string;
     surname?: string;
@@ -27,20 +28,14 @@ type UserSchool = {
     code?: string | number;
 };
 
-type Headers = {
-    [key: string]: string;
-};
-
 type FetchType = "students" | "parents" | "users" | (string & {});
-type FetchMethod = "GET" | "POST" | "PUT";
 type FetchId = "userId" | "userIdent";
 type FetchResponseType = "json" | "buffer" | "text";
 
-interface BaseFetchOptions {
-    method?: FetchMethod;
-    body?: BodyInit;
+interface BaseFetchOptions extends Omit<Dispatcher.RequestOptions, 'method' | 'path'> {
     responseType?: FetchResponseType;
-    customHeaders?: HeadersInit; 
+    customHeaders?: Record<string, string>;
+    method?: Dispatcher.HttpMethod
 }
 
 interface FetchOptions extends BaseFetchOptions {
@@ -412,7 +407,6 @@ type DidacticsItem = {
 export {
     ClassOptions,
     User,
-    Headers,
     FetchOptions,
     LoginResponse,
     AgendaFilter,

@@ -1,10 +1,12 @@
-import { HeadersInit } from "node-fetch";
-import { userTypesKeys } from "../Enums";
+import { userTypesKeys } from "../base/enums";
+import { Dispatcher } from "undici";
+import { WithLoggingOptions } from "../interfaces/logging";
 
-interface ClassOptions {
-    email?: string;
-    password?: string;
+type LoginOptions = {
+    email: string;
+    password: string;
 }
+interface ClassOptions extends Partial<LoginOptions>, Partial<WithLoggingOptions> {}
 
 type User = {
     alt_cell: string | null;
@@ -39,12 +41,9 @@ type FetchBody = {
     a: string;
 } & Record<string, string | number>;
 
-interface FetchOptions {
+interface FetchOptions extends Partial<Omit<Dispatcher.RequestOptions, 'body'>> {
   url: string;
-  path?: string;
-  method?: string;
   body?: FetchBody;
-  headers?: HeadersInit;
   OAS?: boolean;
 }
 
@@ -99,6 +98,7 @@ type contactInfo = {
 }
 
 export {
+    LoginOptions,
     ClassOptions,
     User,
     Account,
