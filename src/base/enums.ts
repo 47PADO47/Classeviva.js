@@ -1,4 +1,4 @@
-import { ObjectValues } from "./typings/Enums";
+import { ObjectValues } from "../types/enums";
 
 const States = {
     Italy: "IT",
