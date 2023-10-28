@@ -20,7 +20,7 @@ class HTTPClient extends Client implements IHTTPCLient {
         return response;
     }
 
-    log(...args: any[]): void {
+    log(...args: unknown[]): void {
         if (!this.debug) return;
         console.log('[\x1b[36mHTTP Client\x1b[0m]', ...args);
     }

@@ -39,7 +39,7 @@ abstract class BaseApiClient implements IBaseApiClient {
     protected abstract getPath(): string;
     protected abstract resetAuth(): BaseApiClient;
 
-    log(...args: any[]): void {
+    log(...args: unknown[]): void {
         if (!this.debug) return;
         console.log(`[\x1b[31mCLASSEVIVA\x1b[0m]`, ...args);
     }
