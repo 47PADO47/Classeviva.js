@@ -300,7 +300,7 @@ class Web extends BaseApiClient {
     headers: head = {},
     json = true,
   }: FetchOptions): Promise<any> {
-    if (!this.authorized) return this.error("Not logged in ❌");
+    if (!this.authorized) return this.error("Not logged in");
 
     const headers = {
       ...this.headers,

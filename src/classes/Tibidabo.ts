@@ -368,7 +368,7 @@ class Tibidabo extends BaseApiClient {
     headers: head = {},
     OAS = true,
   }: FetchOptions): Promise<T> {
-    if (!this.authorized) return this.error("Not logged in ❌");
+    if (!this.authorized) return this.error("Not logged in");
 
     const headers = {
       ...this.headers,
