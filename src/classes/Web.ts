@@ -28,6 +28,10 @@ class Web extends BaseApiClient {
 
     this.#loginData = options.credentials || { uid: "", pwd: "", };
     this.resetAuth();
+
+    this.setHeaders({
+      'Content-Type': 'application/x-www-form-urlencoded'
+    })
   }
 
   async login(data: LoginData = this.#loginData): Promise<ClassUser | undefined> {
@@ -38,6 +42,7 @@ class Web extends BaseApiClient {
       path: url,
       method: "POST",
       body,
+      headers: this.headers,
     });
 
     const json = await response
