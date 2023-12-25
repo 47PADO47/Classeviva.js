@@ -19,7 +19,7 @@
     "url": "git://github.com/47PADO47/Classeviva.js.git"
   },
   "dependencies": {
-    "undici": "^5.26.4"
+    "undici": "^6.2.1"
   },
   "license": "MIT",
   "devDependencies": {
