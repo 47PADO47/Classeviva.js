@@ -29,8 +29,6 @@ abstract class BaseApiClient implements IBaseApiClient {
             "User-Agent": this.app || '',
             "X-Requested-With": "XMLHttpRequest",
         };
-
-        this.log('app', this.app);
     }
     
     public abstract login(): Promise<User | undefined>;

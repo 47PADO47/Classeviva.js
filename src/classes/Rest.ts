@@ -42,7 +42,9 @@ class Rest extends BaseApiClient {
         this.setHeaders({
             "Z-Dev-Apikey": "Tg1NWEwNGIgIC0K",
             "Z-If-None-Match": "",
-        })
+        });
+
+        this.log('app', this.app);
     }
 
     /**
