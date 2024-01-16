@@ -1,6 +1,6 @@
 import { BaseApiClientOptions, FetchOptions, IBaseApiClient, User } from "../types/client";
 import HTTPClient from "./http";
-import ApiError from "./error";
+import ApiError from "../errors/api";
 import { App } from "./enums";
 import { Dispatcher } from "undici";
 
