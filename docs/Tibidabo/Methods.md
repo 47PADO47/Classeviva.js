@@ -28,11 +28,23 @@
 
 > getUnreadMessagesCount
 
-> sendMessage
-
 > removeMeFromThread
 
 > reportMessage
+
+> getPrivacyOptions
+
+> deleteMessage
+
+> getAttach
+
+> getMessage
+
+> createGroup
+
+> addUserToGroup
+
+> removeUserFromGroup
 
 > isEmail
 
