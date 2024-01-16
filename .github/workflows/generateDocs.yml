@@ -12,9 +12,9 @@ jobs:
     name: Build & Generate
     steps:
       - name: Checkout
-      - uses: actions/checkout@v4
+        uses: actions/checkout@v4
       - name: Setup Node
-      - uses: actions/setup-node@v4
+        uses: actions/setup-node@v4
         with:
           node-version: '21.6.0'
       - name: Install
