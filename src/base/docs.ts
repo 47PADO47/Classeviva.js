@@ -2,6 +2,7 @@ import { join } from 'path';
 import fs from 'fs';
 import { FScheckOptions } from '../types/docs';
 import BaseApiClient from './client';
+import DocsError from '../errors/docs';
 
 const tab = '   ';
 
@@ -159,7 +160,7 @@ class DocsUpdater {
 
     private error(msg: string): never {
         this.log('❌', msg);
-        process.exit(1);
+        throw new DocsError(msg);
     }
 
     private log(emoji: string, message: string, space: boolean = false) {
