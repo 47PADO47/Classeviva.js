@@ -145,7 +145,6 @@ class Tibidabo extends BaseApiClient {
     const data: {targets: msgTargets} = await this.fetch({
       url: `SocMsgApi.php`,
       body: {
-        //a: "acGetMsgTargets",
         a: "acGetGroups",
         withUsers: this.booleanToInt(withUsers),
       },
@@ -240,6 +239,7 @@ class Tibidabo extends BaseApiClient {
         a: 'acPostComment',
         id: messageId,
         message: comment,
+        flags: '' //8 - interno
       },
     });
 
@@ -270,27 +270,36 @@ class Tibidabo extends BaseApiClient {
   }
 
   //sends message, but apparently they dont show up
-  async sendMessage(message: string, subject: string, targetID: number | string) {
+  /*async sendMessage(message: string, subject: string, targetID: number | string, targetType: string) {
     const data = await this.fetch({
       url: `messaggi.php`,
       path: 'sps-api',
       body: {
         a: 'acPostMsg',
-        uid: targetID,
+        'targets[]': 'persona.type+persona.id-persona.xhash',
+        //'groups[]': "",
         subject,
         message,
+        ctx: '',
       },
     });
 
     return data;
-  }
+  }*/
 
   // Throws "010/Permission denied"
   /*async addMoreTargets(messageId: string, targetID: number | string) {
+
     const data = await this.fetch({
       url: `messaggi.php`,
       path: 'sps-api',
-      body: `a=acAddMoreTargets&mids[]=${messageId}&uids[]=${targetID}`,
+      body: `a=acAddMoreTargets&msgid[]=${messageId}&uids[]=${targetID}`,
+    });
+
+    const data = await this.fetch({
+      url: `messaggi.php`,
+      path: 'sps-api',
+      body: `a=acAddMoreTargets&msgid=${messageId}&targets=[{ 'type': targetType, 'id': targetID }]`,
     });
 
     return data;
@@ -322,6 +331,72 @@ class Tibidabo extends BaseApiClient {
     return data;
   }
 
+  async getPrivacyOptions() {
+    const data = await this.fetch({
+      url: `messaggi.php`,
+      path: 'sps-api',
+      body: {
+        a: 'acGetDlgOpts',
+      },
+    });
+
+    return data;
+  }
+
+  async deleteMessage(messageId: string | number) {
+    const data = await this.fetch({
+      url: `messaggi.php`,
+      path: 'sps-api',
+      body: {
+        a: 'acDelMsg',
+        id: messageId,
+      },
+    });
+
+    return data;
+  }
+
+  async getAttach(messageId: string | number) {
+    const data = await this.fetch({
+      url: `messaggi.php`,
+      path: 'sps-api',
+      body: {
+        a: 'acGetAttach',
+        xpm: messageId,
+      },
+    });
+
+    return data;
+  }
+
+  async getMessage(messageId: string | number) {
+    const data = await this.fetch({
+      url: `SocMsgApi.php`,
+      body: {
+        a: 'acGetMsgPag',
+        mid: messageId,
+        'mode': 'show'
+      },
+    });
+
+    return data;
+  }
+
+  /*
+  function recordPrivacyFlagChange(newval,mode){
+    $.ajax({
+      type: 'POST',
+      url: spsVars.msgScript+'?a=acSavePrvFlg',
+      data: {
+        'flags': newval,
+        'mode': mode
+      },
+      dataType: 'JSON',
+      async:false
+    });
+  }
+  */
+
   /*async addMessageAttachment(messageId: string | number, attachment: Buffer) {
     const data = await this.fetch({
       url: `messaggi.php`,
@@ -336,6 +411,51 @@ class Tibidabo extends BaseApiClient {
 
     return data;
   }*/
+
+  async createGroup(name: string, desc: string) {
+    const data = await this.fetch({
+      url: `GroupsApi.php`,
+      path: 'sps',
+      body: {
+        a: 'aGrpNew',
+        name: name,
+        sdes: desc,
+        jmod: ''
+      },
+    });
+
+    return data;
+  }
+  
+  async addUserToGroup(userId: string, groupId: string | number) {
+    const data = await this.fetch({
+      url: `GroupsApi.php`,
+      path: 'sps',
+      body: {
+        a: 'aGrpUserAdd',
+        owner: '',
+        peer: userId,
+        grp: groupId,
+      },
+    });
+
+    return data;
+  }
+  
+  async removeUserFromGroup(userId: string, groupId: string | number) {
+    const data = await this.fetch({
+      url: `GroupsApi.php`,
+      path: 'sps',
+      body: {
+        a: 'aGrpUserDel',
+        owner: '',
+        peer: userId,
+        grp: groupId,
+      },
+    });
+
+    return data;
+  }
 
   #objToURLParams(obj: any) {
     return new URLSearchParams(Object.entries(obj)).toString();
